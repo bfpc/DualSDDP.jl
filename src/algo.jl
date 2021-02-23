@@ -23,14 +23,18 @@ function forward(stages, state0)
 end
 
 function forward_dual(stages, state0)
+  ϵ = 1e-1
+
   gamma0 = 1.0
   for (i,stage) in enumerate(stages)
     set_initial_state!(stage, state0, gamma0)
     JuMP.optimize!(stage)
 
-    gammas = JuMP.value.(stage.ext[:vars][2]) # + epsilon
+    # Regularize probabilities, so that there's a chance to sample every scenario
+    gammas = JuMP.value.(stage.ext[:vars][2]) .+ ϵ*gamma0
+    gammas_r = gammas .+ ϵ*gamma0
     println("  ", gammas)
-    j = choose(gammas, norm=sum(gammas))
+    j = choose(gammas_r, norm=sum(gammas_r))
     state0 = JuMP.value.(stage.ext[:vars][1][:,j])
     gamma0 = gammas[j]
     println("Going out from stage $i, branch $j, state $state0, prob $gamma0")
