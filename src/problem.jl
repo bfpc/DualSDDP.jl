@@ -26,8 +26,10 @@ include("structs.jl")
 function mk_primal_decomp(M::MSLBO, T::Int, risk)
   stages = Model[]
   for t in 1:T
+    prob = M.prob(t)
+
     m = Model()
-    n = length(M.prob(t))
+    n = length(prob)
     nx = size(M.A(t,1),2)
     nxprev = size(M.B(t,1),2)
     ny = length(M.c(t,1))
@@ -67,8 +69,9 @@ end
 function mk_dual_decomp(M::MSLBO, T::Int, dualrisk)
   stages = Model[]
   for t in 1:T
+    prob = M.prob(t)
     m = Model()
-    n = length(M.prob(t))
+    n = length(prob)
     nx = length(M.Ux(t))
     ny = length(M.Uy(t))
     nd = length(M.d(t,1))
@@ -92,9 +95,10 @@ function mk_dual_decomp(M::MSLBO, T::Int, dualrisk)
     z = @variable(m, z[j=1:n])
     set_lower_bound.(z,M.lb(t))
 
-    dualrisk(m, γ, M.prob(t), γ0)
+    dualrisk(m, γ, prob, γ0)
 
     m.ext[:vars] = (π, γ, π0, γ0, λ, ζ, ξ, z)
+    m.ext[:prob] = prob
 
     if t == 1
       @objective(m, Min, sum(λ[:,j]'*M.d(t,j) + ξ[:,j]'*M.Uy(t) + z[j] for j=1:n))
