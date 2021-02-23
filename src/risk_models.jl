@@ -27,8 +27,8 @@ end
 
 function mk_copersp_avar(beta)
   function copersp_avar(m, gamma, ps, gamma_in)
-    @constraint(m, _z_ru, sum(ps' * gamma) == gamma_in)
-    @constraint(m, gamma .<= gamma_in/beta)
+    @constraint(m, _z_ru, sum(gamma) == gamma_in)
+    @constraint(m, gamma .<= (gamma_in/beta) .* ps)
   end
 end
 
