@@ -4,13 +4,14 @@ Pkg.activate(".")
 include("problem.jl")
 include("risk_models.jl")
 
+include("hydro_conf.jl")
 include("hydro.jl")
 
-f3      = mk_primal_avar(0.3)
-f3_dual = mk_copersp_avar(0.3)
+risk      = mk_primal_avar(beta)
+risk_dual = mk_copersp_avar(beta)
 
-primal_pb = mk_primal_decomp(Hydro1d.M, 5, f3)
-dual_pb   = mk_dual_decomp(Hydro1d.M, 5, f3_dual)
+primal_pb = mk_primal_decomp(Hydro1d.M, nstages, risk)
+dual_pb   = mk_dual_decomp(Hydro1d.M, nstages, risk_dual)
 
 
 # Demo forward, needs solver
@@ -29,10 +30,26 @@ for m in dual_pb
   JuMP.set_optimizer(m, solver)
 end
 
-println("Forward on the primal")
-forward(primal_pb, [53.222])
+println("********")
+println(" PRIMAL ")
+println("********")
+println("Forward-backward Iterations")
+for i = 1:10
+  forward(primal_pb, [inivol])
+  backward(primal_pb)
+  println("Iteration $i: LB = ", JuMP.objective_value(primal_pb[1]))
+end
+
 println()
 
-println("Forward on the dual")
-forward_dual(dual_pb, [0.0])
+println("********")
+println("  DUAL  ")
+println("********")
+println("Forward-backward Iterations")
+for i = 1:10
+  forward_dual(dual_pb, [0.0])
+  backward_dual(dual_pb)
+  println("Iteration $i: UB = ", -JuMP.objective_value(dual_pb[1]))
+end
+
 

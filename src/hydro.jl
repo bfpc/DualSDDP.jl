@@ -2,8 +2,6 @@ include("structs.jl")
 
 module Hydro1d
 
-nscen = 10
-
 function A(t::Int, i::Int)
   return reshape([1.0, 0], 2, 1)
 end
@@ -20,11 +18,12 @@ function c(t::Int, i::Int)
   return [0, 1, 5, 10, 50]
 end
 
-import Random
-Random.seed!(2)
-af = 40 .+ 20*randn(nscen)
 function d(t::Int, i::Int)
-  return [af[i], 75]
+  if t == 1
+    return [0, 75.0]
+  else
+    return [Main.inflows[i], 75.0]
+  end
 end
 
 function Ux(t::Int)
@@ -42,7 +41,11 @@ function ub(t::Int)
 end
 
 function prob(t::Int)
-  return ones(nscen)/nscen
+  if t == 1
+    return [1.0]
+  else
+    return ones(Main.nscen)/Main.nscen
+  end
 end
 
 M = Main.MSLBO(A,B,T,c,d,Ux,Uy,lb,ub,prob)
