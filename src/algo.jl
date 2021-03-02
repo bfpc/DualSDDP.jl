@@ -49,3 +49,50 @@ function forward_dual(stages, state0; debug=0)
     end
   end
 end
+
+function add_cut!(stage, next)
+  ref = JuMP.FixRef.(next.ext[:vars][2])
+  x0 = JuMP.value.(ref)
+  multipliers = JuMP.dual.(ref)
+  cst = JuMP.dual_objective_value(next)
+
+  z = stage.ext[:vars][5]
+  x = stage.ext[:vars][1]
+
+  n_scen = length(z)
+  for j = 1:n_scen
+    JuMP.@constraint(stage, z[j] >= cst + multipliers'*(x[:,j] .- x0))
+  end
+end
+
+function add_cut_dual!(stage, next)
+  ref_π = JuMP.FixRef.(next.ext[:vars][3])
+  ref_γ = JuMP.FixRef.(next.ext[:vars][4])
+  π0 = JuMP.value.(ref_π)
+  γ0 = JuMP.value(ref_γ)
+  mul_π = JuMP.dual.(ref_π)
+  mul_γ = JuMP.dual.(ref_γ)
+  cst = JuMP.dual_objective_value(next)
+
+  z = stage.ext[:vars][8]
+  π = stage.ext[:vars][1]
+  γ = stage.ext[:vars][2]
+
+  n_scen = length(z)
+  for j = 1:n_scen
+    JuMP.@constraint(stage, z[j] >= cst + mul_π'*(π[:,j] .- π0) + mul_γ*(γ[j] - γ0))
+  end
+end
+
+function backward(stages)
+  for i in 1:(length(stages)-1)
+    add_cut!(stages[i], stages[i+1])
+  end
+end
+
+function backward_dual(stages)
+  for i in 1:(length(stages)-1)
+    add_cut_dual!(stages[i], stages[i+1])
+  end
+end
+
