@@ -36,7 +36,7 @@ function forward_dual(stages, state0; debug=0)
     JuMP.optimize!(stage)
 
     # Regularize probabilities, so that there's a chance to sample every scenario
-    gammas = JuMP.value.(stage.ext[:vars][2]) .+ ϵ*gamma0
+    gammas = JuMP.value.(stage.ext[:vars][2])
     gammas_r = gammas .+ ϵ*gamma0
     if debug > 0
       println("  ", gammas)
