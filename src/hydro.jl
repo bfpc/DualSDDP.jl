@@ -37,11 +37,14 @@ end
 function lb(t::Int)
   return 0
 end
+function ub(t::Int)
+  return (Main.nstages - t + 1)*75*50
+end
 
 function prob(t::Int)
   return ones(nscen)/nscen
 end
 
-M = Main.MSLBO(A,B,T,c,d,Ux,Uy,lb,prob)
+M = Main.MSLBO(A,B,T,c,d,Ux,Uy,lb,ub,prob)
 
 end
