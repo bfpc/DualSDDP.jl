@@ -46,8 +46,9 @@ println("********")
 println("  DUAL  ")
 println("********")
 println("Forward-backward Iterations")
+init_dual(dual_pb, [inivol])
 for i = 1:10
-  forward_dual(dual_pb, [0.0])
+  forward_dual(dual_pb)
   backward_dual(dual_pb)
   println("Iteration $i: UB = ", -JuMP.objective_value(dual_pb[1]))
 end

@@ -102,6 +102,7 @@ function mk_dual_decomp(M::MSLBO, T::Int, dualrisk)
 
     if t == 1
       @objective(m, Min, sum(λ[:,j]'*M.d(t,j) + ξ[:,j]'*M.Uy(t) + z[j] for j=1:n))
+      @constraint(m, sum(M.B(t,j)'*λ[:,j] for j=1:n) .== π0)
       fix(γ0, 1)
     else
       @constraint(m, sum(M.B(t,j)'*λ[:,j] for j=1:n) + ζ .>= π0)

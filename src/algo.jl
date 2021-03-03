@@ -27,12 +27,21 @@ function forward(stages, state0; debug=0)
   end
 end
 
-function forward_dual(stages, state0; debug=0)
+function init_dual(stages, x0)
+  m1 = stages[1]
+  o1 = JuMP.objective_function(m1)
+  JuMP.set_objective_function(m1, o1 - m1[:π0]'*x0)
+end
+
+function forward_dual(stages; debug=0)
   ϵ = 1e-1
 
   gamma0 = 1.0
+  state0 = Float64[]
   for (i,stage) in enumerate(stages)
-    set_initial_state!(stage, state0, gamma0)
+    if i > 1
+      set_initial_state!(stage, state0, gamma0)
+    end
     JuMP.optimize!(stage)
 
     # Regularize probabilities, so that there's a chance to sample every scenario
