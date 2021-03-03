@@ -1,12 +1,12 @@
 # Parameters
-nstages = 2
-beta    = 1.0
+nstages = 4
+beta    = 0.4
 niters  = 40
 
 # Uncertainty
 import Random
 
-nscen = 3
+nscen = 10
 Random.seed!(2)
 inflows = 40 .+ 20*randn(nscen)
 
