@@ -59,6 +59,11 @@ function forward_dual(stages; debug=0)
     gamma0 = gammas[j]
     if debug > 0
       println("Going out from stage $i, branch $j, state $state0, prob $gamma0")
+      if debug > 1
+        println("                         local decisions: ", JuMP.value.(stage[:λ]))
+        println("                                        : ", JuMP.value.(stage[:ζ]))
+        println("                                        : ", JuMP.value.(stage[:ξ]))
+      end
     end
   end
 end
