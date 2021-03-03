@@ -9,6 +9,7 @@ function choose(prob; norm=1.0)
       return j
     end
   end
+  return length(prob)
 end
 
 function forward(stages, state0; debug=0)
