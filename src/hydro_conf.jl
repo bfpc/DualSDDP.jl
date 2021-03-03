@@ -1,6 +1,7 @@
 # Parameters
 nstages = 2
 beta    = 1.0
+niters  = 40
 
 # Uncertainty
 import Random

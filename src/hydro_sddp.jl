@@ -35,7 +35,7 @@ pb = SDDP.LinearPolicyGraph(build_hydro;
                             optimizer = solver,
                             lower_bound = 0.0);
 
-SDDP.train(pb, iteration_limit=10, risk_measure=SDDP.AVaR(beta))
+SDDP.train(pb, iteration_limit=niters, risk_measure=SDDP.AVaR(beta))
 
 using Statistics: mean, std
 

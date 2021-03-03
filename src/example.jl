@@ -34,7 +34,7 @@ println("********")
 println(" PRIMAL ")
 println("********")
 println("Forward-backward Iterations")
-for i = 1:10
+for i = 1:niters
   forward(primal_pb, [inivol])
   backward(primal_pb)
   println("Iteration $i: LB = ", JuMP.objective_value(primal_pb[1]))
@@ -47,7 +47,7 @@ println("  DUAL  ")
 println("********")
 println("Forward-backward Iterations")
 init_dual(dual_pb, [inivol])
-for i = 1:10
+for i = 1:niters
   forward_dual(dual_pb)
   backward_dual(dual_pb)
   println("Iteration $i: UB = ", -JuMP.objective_value(dual_pb[1]))
