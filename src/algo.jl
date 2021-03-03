@@ -1,6 +1,9 @@
 import JuMP
 
 function choose(prob; norm=1.0)
+  if norm == 0
+    return rand(1:length(prob))
+  end
   v = rand()*norm
   acc = 0
   for (j,p) in enumerate(prob)
