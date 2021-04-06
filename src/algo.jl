@@ -15,13 +15,17 @@ function choose(prob; norm=1.0)
   return length(prob)
 end
 
-function forward(stages, state0; debug=0)
+function forward(stages, state0; debug=0,return_traj =false)
+  if return_traj
+    traj=[state0]
+  end
   for (i,stage) in enumerate(stages)
     set_initial_state!(stage, state0)
     JuMP.optimize!(stage)
 
     j = choose(stage.ext[:prob])
     state0 = JuMP.value.(stage.ext[:vars][1][:,j])
+    return_traj && push!(traj,state0)
     if debug > 0
       println("Going out from stage $i, branch $j, state $state0")
       if debug > 1
@@ -29,7 +33,10 @@ function forward(stages, state0; debug=0)
       end
     end
   end
+  return_traj && return traj
 end
+
+
 
 function init_dual(stages, x0)
   m1 = stages[1]
@@ -114,3 +121,19 @@ function backward_dual(stages)
   end
 end
 
+function forward_backward(stages, niters ; return_traj = false)
+  println("********")
+  println(" PRIMAL ")
+  println("********")
+  println("Forward-backward Iterations")
+
+  if return_traj
+    trajs = []
+  end
+
+  for i = 1:niters
+    push!(trajs,forward(primal_pb, [inivol];return_traj=return_traj))
+    backward(primal_pb)
+  end
+  return_traj && return trajs
+end
