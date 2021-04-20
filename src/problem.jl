@@ -84,6 +84,7 @@ function mk_dual_decomp(M::MSLBO, T::Int, dualrisk)
     π0 = @variable(m, π0[i=1:nx])
     γ0 = @variable(m, γ0)
 
+    set_lower_bound.(γ,0)
     set_lower_bound.(ζ,0)
     set_lower_bound.(ξ,0)
 
