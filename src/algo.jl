@@ -44,7 +44,7 @@ function init_dual(stages, x0)
   JuMP.set_objective_function(m1, o1 - m1[:π0]'*x0)
 end
 
-function forward_dual(stages; debug=0)
+function forward_dual(stages; debug=0, normalize=false)
   ϵ = 1e-1
 
   gamma0 = 1.0
@@ -64,6 +64,10 @@ function forward_dual(stages; debug=0)
     j = choose(gammas_r, norm=sum(gammas_r))
     state0 = JuMP.value.(stage.ext[:vars][1][:,j])
     gamma0 = gammas[j]
+    if normalize && (gamma0 != 0)
+      state0 ./= gamma0
+      gamma0   = 1
+    end
     if debug > 0
       println("Going out from stage $i, branch $j, state $state0, prob $gamma0")
       if debug > 1
