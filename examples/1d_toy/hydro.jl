@@ -1,4 +1,4 @@
-include("structs.jl")
+include(src * "structs.jl")
 
 module Hydro1d
 

@@ -1,13 +1,17 @@
-import Pkg
-Pkg.activate(".")
+maindir = "../../"
+src     = maindir * "src/"
 
-include("problem.jl")
-include("risk_models.jl")
+import Pkg
+Pkg.activate(maindir)
+
+include(src * "problem.jl")
+include(src * "risk_models.jl")
+include(src * "algo.jl")
+include(src * "ub.jl")
 
 include("hydro_conf.jl")
 include("hydro.jl")
 
-include("ub.jl")
 
 risk      = mk_primal_avar(beta)
 risk_dual = mk_copersp_avar(beta)
@@ -15,9 +19,6 @@ risk_dual = mk_copersp_avar(beta)
 primal_pb = mk_primal_decomp(Hydro1d.M, nstages, risk)
 dual_pb   = mk_dual_decomp(Hydro1d.M, nstages, risk_dual)
 
-
-# Demo forward, needs solver
-include("algo.jl")
 
 # import Gurobi
 # env = Gurobi.Env()
