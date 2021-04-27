@@ -121,7 +121,7 @@ function backward_dual(stages)
   end
 end
 
-function forward_backward(stages, niters ; return_traj = false)
+function forward_backward(stages, niters, ini_state; return_traj=false)
   println("********")
   println(" PRIMAL ")
   println("********")
@@ -132,7 +132,7 @@ function forward_backward(stages, niters ; return_traj = false)
   end
 
   for i = 1:niters
-    push!(trajs,forward(primal_pb, [inivol];return_traj=return_traj))
+    push!(trajs,forward(primal_pb, ini_state; return_traj=return_traj))
     backward(primal_pb)
   end
   return_traj && return trajs

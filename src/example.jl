@@ -32,7 +32,7 @@ for m in dual_pb
   JuMP.set_optimizer(m, solver)
 end
 
-traj = forward_backward(primal_pb, niters ; return_traj = true)
+traj = forward_backward(primal_pb, niters, [inivol]; return_traj = true)
 stages = mk_primal_decomp(Hydro1d.M, nstages, risk)
 for m in stages
   JuMP.set_optimizer(m, solver)
