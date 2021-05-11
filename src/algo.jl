@@ -125,19 +125,67 @@ function backward_dual(stages)
   end
 end
 
-function forward_backward(stages, niters, ini_state; return_traj=false)
+function primalsolve(M, nstages, risk, solver, state0, niters;
+                     verbose=false, ub=false)
+  pb = mk_primal_decomp(M, nstages, risk)
+  for m in pb
+    JuMP.set_optimizer(m, solver)
+  end
+
   println("********")
   println(" PRIMAL ")
   println("********")
-  println("Forward-backward Iterations")
-
-  if return_traj
-    trajs = []
-  end
-
+  trajs = []
   for i = 1:niters
-    push!(trajs,forward(primal_pb, ini_state; return_traj=return_traj))
-    backward(primal_pb)
+    push!(trajs, forward(pb, state0; return_traj=true))
+    backward(pb)
+    verbose && println("Iteration $i: LB = ", JuMP.objective_value(pb[1]))
   end
-  return_traj && return trajs
+  if verbose
+    println()
+  else
+    println("Lower bound: ", JuMP.objective_value(pb[1]))
+  end
+
+  if ub
+    println("********************")
+    println(" PRIMAL Upper Bounds")
+    println("********************")
+    stages = mk_primal_decomp(M, nstages, risk)
+    for m in stages
+      JuMP.set_optimizer(m, solver)
+    end
+    Ubs = convex_ub(stages, trajs)
+    if verbose
+      println("Recursive upper bounds on $niters trajectories")
+      display(Ubs)
+    else
+      println("Upper bound: ", maximum(Ubs[:,0]))
+    end
+    return pb, trajs, stages, Ubs
+  else
+    return pb, trajs
+  end
+end
+
+function dualsolve(M, nstages, risk, solver, state0, niters; verbose=false)
+  pb = mk_dual_decomp(M, nstages, risk)
+  for m in pb
+    JuMP.set_optimizer(m, solver)
+  end
+  println("********")
+  println("  DUAL  ")
+  println("********")
+  for i = 1:niters
+    forward_dual(pb)
+    backward_dual(pb)
+    println("Iteration $i: UB = ", -JuMP.objective_value(pb[1]))
+  end
+  if verbose
+    println()
+  else
+    println("Upper bound: ", -JuMP.objective_value(pb[1]))
+  end
+
+  return pb
 end
