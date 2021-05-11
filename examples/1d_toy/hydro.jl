@@ -40,6 +40,10 @@ function ub(t::Int, nstages::Int)
   return (nstages - t + 1)*75*50
 end
 
+function Lip(t::Int, nstages::Int)
+  return (nstages - t + 1)*50
+end
+
 function prob(t::Int)
   if t == 1
     return [1.0]
@@ -48,6 +52,6 @@ function prob(t::Int)
   end
 end
 
-M = Main.MSLBO(A,B,T,c,d,Ux,Uy,lb,ub,prob)
+M = Main.MSLBO(A,B,T,c,d,Ux,Uy,lb,ub,Lip,prob)
 
 end

@@ -60,6 +60,14 @@ function ub(t::Int, nstages::Int)
   return tot
 end
 
+function Lip(t::Int, nstages::Int)
+  tot = 0.
+  for t in nstages:-1:t
+    tot += maximum(c(t,1))
+  end
+  return tot
+end
+
 function prob(t::Int)
   if t == 1
     return [1]
@@ -69,6 +77,6 @@ function prob(t::Int)
   end
 end
 
-M = Main.MSLBO(A,B,T,c,d,Ux,Uy,lb,ub,prob)
+M = Main.MSLBO(A,B,T,c,d,Ux,Uy,lb,ub,Lip,prob)
 
 end

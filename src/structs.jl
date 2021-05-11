@@ -8,5 +8,6 @@ struct MSLBO
   Uy :: Function
   lb :: Function
   ub :: Function
+  Lip :: Function
   prob :: Function
 end
