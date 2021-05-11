@@ -176,6 +176,7 @@ function dualsolve(M, nstages, risk, solver, state0, niters; verbose=false)
   println("********")
   println("  DUAL  ")
   println("********")
+  init_dual(pb, state0)
   for i = 1:niters
     forward_dual(pb)
     backward_dual(pb)
