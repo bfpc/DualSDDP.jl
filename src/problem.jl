@@ -49,7 +49,7 @@ function mk_primal_decomp(M::MSLBO, T::Int, risk)
 
     _t = @variable(m, _t[j=1:n])
     _z = @variable(m, _z[j=1:n])
-    set_lower_bound.(_z, M.lb(t))
+    set_lower_bound.(_z, M.lb(t,T))
 
     @constraint(m, [j=1:n], _t[j] >= M.c(t,j)'*y[:,j] + _z[j])
     risk(m, _t, prob)
@@ -94,7 +94,7 @@ function mk_dual_decomp(M::MSLBO, T::Int, dualrisk)
     end
 
     z = @variable(m, z[j=1:n])
-    set_lower_bound.(z, -M.ub(t))
+    set_lower_bound.(z, -M.ub(t,T))
 
     dualrisk(m, γ, prob, γ0)
 

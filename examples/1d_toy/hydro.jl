@@ -33,11 +33,11 @@ function Uy(t::Int)
   return [60, 200, 15, 15, 75]
 end
 
-function lb(t::Int)
+function lb(t::Int, nstages::Int)
   return 0
 end
-function ub(t::Int)
-  return (Main.nstages - t + 1)*75*50
+function ub(t::Int, nstages::Int)
+  return (nstages - t + 1)*75*50
 end
 
 function prob(t::Int)

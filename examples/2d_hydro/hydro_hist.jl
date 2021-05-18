@@ -49,12 +49,12 @@ function Uy(t::Int)
           max_deficit_t; max_xch]
 end
 
-function lb(t::Int)
+function lb(t::Int, nstages::Int)
   return 0
 end
-function ub(t::Int)
+function ub(t::Int, nstages::Int)
   tot = 0.
-  for t in Main.nstages:-1:t
+  for t in nstages:-1:t
     tot += sum(c(t,1) .* Uy(t))
   end
   return tot
