@@ -31,11 +31,11 @@ solver = JuMP.optimizer_with_attributes(() -> Gurobi.Optimizer(env), "OutputFlag
 primalsolve(Hydro_Hist.M, nstages, risk, solver, inivol, niters; verbose=true)
 
 # Pure dual
-# Currently not working, diverging to very negative values
+# Currently not working: with more scenarios does not show progress
 using Random: seed!
 seed!(1)
-dual_pb = dualsolve(Hydro_Hist.M, nstages, risk_dual, solver, inivol, niters; verbose=true)
+dual_pb = dualsolve(Hydro_Hist.M, nstages, risk_dual, solver, inivol, 5*niters; verbose=true)
 
 # Primal with interior bounds
-# Currently not working, state escapes convex hull
+# Currently not working: sometimes the state escapes the convex hull
 primal_pb, primal_trajs, primal_aux, Ubs = primalsolve(Hydro_Hist.M, nstages, risk, solver, inivol, niters; verbose=true, ub=true)
