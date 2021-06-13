@@ -39,3 +39,4 @@ dual_pb = dualsolve(Hydro_Hist.M, nstages, risk_dual, solver, inivol, 5*niters; 
 # Primal with interior bounds
 # Currently not working: sometimes the state escapes the convex hull
 primal_pb, primal_trajs, primal_aux, Ubs = primalsolve(Hydro_Hist.M, nstages, risk, solver, inivol, niters; verbose=true, ub=true)
+nothing

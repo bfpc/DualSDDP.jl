@@ -34,3 +34,4 @@ dual_pb = dualsolve(Hydro1d.M, nstages, risk_dual, solver, [inivol], niters; ver
 
 # Primal with interior bounds
 primal_pb, primal_trajs, primal_aux, Ubs = primalsolve(Hydro1d.M, nstages, risk, solver, [inivol], niters; verbose=true, ub=true)
+nothing
