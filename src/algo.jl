@@ -45,7 +45,7 @@ function init_dual(stages, x0)
 end
 
 function forward_dual(stages; debug=0, normalize=false)
-  ϵ = 1e-1
+  ϵ = 1e-2
 
   gamma0 = 1.0
   state0 = Float64[]
