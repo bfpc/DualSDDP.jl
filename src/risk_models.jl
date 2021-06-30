@@ -17,14 +17,6 @@ function mk_primal_avar(beta)
   end
 end
 
-
-function mk_dual_avar(beta)
-  function dual_avar(m, gamma, ps)
-    @constraint(m, _z_ru, sum(ps' * gamma) == 1)
-    JuMP.set_upper_bound.(gamma, 1/beta)
-  end
-end
-
 function mk_copersp_avar(beta)
   function copersp_avar(m, gamma, ps, gamma_in)
     @constraint(m, _z_ru, sum(gamma) == gamma_in)
