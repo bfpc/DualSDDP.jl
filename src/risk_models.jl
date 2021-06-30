@@ -1,7 +1,7 @@
 import JuMP
 using JuMP: @variable, @constraint
 
-function mk_primal_avar(beta)
+function mk_primal_avar(beta; lambda=1.0)
   function primal_avar(m, t, ps)
     n = length(t)
     # RU representation: extra variables, constraints and objective function
@@ -13,14 +13,15 @@ function mk_primal_avar(beta)
     # end
     # JuMP.set_lower_bound.(u, 0.0)
     @constraint(m, gamma[i=1:n], z + u[i] >= t[i])
-    JuMP.@objective(m, Min, z + 1/beta*sum(ps' * u))
+    JuMP.@objective(m, Min, (1 - lambda)*sum(ps' * t) + lambda*z + lambda/beta*sum(ps' * u))
   end
 end
 
-function mk_copersp_avar(beta)
+function mk_copersp_avar(beta; lambda=1.0)
   function copersp_avar(m, gamma, ps, gamma_in)
     @constraint(m, _z_ru, sum(gamma) == gamma_in)
-    @constraint(m, gamma .<= (gamma_in/beta) .* ps)
+    @constraint(m, gamma_in*(1. - lambda) .* ps .<= gamma)
+    @constraint(m, gamma .<= gamma_in*(1. - lambda) .* ps + lambda*(gamma_in/beta) .* ps)
   end
 end
 
