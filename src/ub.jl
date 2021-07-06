@@ -8,6 +8,7 @@ function bellman_convex_ub(stage,xs, xs_next,zs)
 
   z = stage.ext[:vars][5] # value next stage
   x = stage.ext[:vars][1]
+  L = stage.ext[:lip]
   n_scen = length(z)
   n_traj = length(zs)
   JuMP.@variable(stage,s[k=1:n_traj,j=1:n_scen] >= 0) # convex combination coeff

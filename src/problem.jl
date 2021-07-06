@@ -56,6 +56,7 @@ function mk_primal_decomp(M::MSLBO, T::Int, risk)
 
     m.ext[:vars] = (x, x0, y, _t, _z)
     m.ext[:prob] = prob
+    m.ext[:lip]  = M.Lip(t, T)
     push!(stages, m)
   end
   return stages
