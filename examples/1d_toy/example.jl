@@ -40,6 +40,7 @@ import PyPlot as plt
 plt.figure(figsize=(6,4));
 plt.plot(dual_ubs, label="Upper bounds");
 plt.plot(primal_lbs, label="Lower bounds");
+plt.xlabel("iteration #");
 plt.legend();
 plt.savefig("bounds.pdf");
 
