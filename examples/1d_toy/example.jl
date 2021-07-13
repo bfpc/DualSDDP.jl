@@ -2,7 +2,7 @@ maindir = "../../"
 src     = maindir * "src/"
 
 import Pkg
-Pkg.activate(maindir)
+Pkg.activate(maindir * "devel/")
 
 include(src * "problem.jl")
 include(src * "risk_models.jl")
@@ -35,4 +35,22 @@ dual_pb, dual_ubs = dualsolve(Hydro1d.M, nstages, risk_dual, solver, [inivol], n
 # Primal with interior bounds
 seed!(2)
 primal_pb, primal_trajs, primal_lbs, primal_aux, Ubs = primalsolve(Hydro1d.M, nstages, risk, solver, [inivol], niters; verbose=true, ub=true)
-nothing
+
+import PyPlot as plt
+plt.figure(figsize=(6,4));
+plt.plot(dual_ubs, label="Upper bounds");
+plt.plot(primal_lbs, label="Lower bounds");
+plt.legend();
+plt.savefig("bounds.pdf");
+
+plt.yscale("log");
+plt.savefig("bounds_semilog.pdf");
+
+plt.figure(figsize=(6,4));
+plt.semilogy(dual_ubs./primal_lbs .- 1);
+plt.xlabel("iteration #");
+plt.title("Relative gap");
+plt.savefig("gap.pdf");
+
+import NPZ
+NPZ.npzwrite("bounds.npz", lb=primal_lbs, ub=dual_ubs);
