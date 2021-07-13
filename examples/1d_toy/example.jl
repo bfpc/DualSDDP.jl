@@ -30,8 +30,9 @@ primalsolve(Hydro1d.M, nstages, risk, solver, [inivol], niters; verbose=true)
 # Pure dual
 using Random: seed!
 seed!(1)
-dual_pb = dualsolve(Hydro1d.M, nstages, risk_dual, solver, [inivol], niters; verbose=true)
+dual_pb, dual_ubs = dualsolve(Hydro1d.M, nstages, risk_dual, solver, [inivol], niters; verbose=true)
 
 # Primal with interior bounds
-primal_pb, primal_trajs, primal_aux, Ubs = primalsolve(Hydro1d.M, nstages, risk, solver, [inivol], niters; verbose=true, ub=true)
+seed!(2)
+primal_pb, primal_trajs, primal_lbs, primal_aux, Ubs = primalsolve(Hydro1d.M, nstages, risk, solver, [inivol], niters; verbose=true, ub=true)
 nothing

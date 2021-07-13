@@ -138,15 +138,18 @@ function primalsolve(M, nstages, risk, solver, state0, niters;
   println(" PRIMAL ")
   println("********")
   trajs = []
+  lbs = Float64[]
   for i = 1:niters
     push!(trajs, forward(pb, state0; return_traj=true))
     backward(pb)
-    verbose && println("Iteration $i: LB = ", JuMP.objective_value(pb[1]))
+    lb = JuMP.objective_value(pb[1])
+    push!(lbs, lb)
+    verbose && println("Iteration $i: LB = ", lb)
   end
   if verbose
     println()
   else
-    println("Lower bound: ", JuMP.objective_value(pb[1]))
+    println("Lower bound: ", lbs[end])
   end
 
   if ub
@@ -164,9 +167,9 @@ function primalsolve(M, nstages, risk, solver, state0, niters;
     else
       println("Upper bound: ", maximum(Ubs[:,0]))
     end
-    return pb, trajs, stages, Ubs
+    return pb, trajs, lbs, stages, Ubs
   else
-    return pb, trajs
+    return pb, trajs, lbs
   end
 end
 
@@ -179,16 +182,19 @@ function dualsolve(M, nstages, risk, solver, state0, niters; verbose=false)
   println("  DUAL  ")
   println("********")
   init_dual(pb, state0)
+  ubs = Float64[]
   for i = 1:niters
     forward_dual(pb)
     backward_dual(pb)
-    println("Iteration $i: UB = ", -JuMP.objective_value(pb[1]))
+    ub = -JuMP.objective_value(pb[1])
+    push!(ubs, ub)
+    verbose && println("Iteration $i: UB = ", ub)
   end
   if verbose
     println()
   else
-    println("Upper bound: ", -JuMP.objective_value(pb[1]))
+    println("Upper bound: ", ubs[end])
   end
 
-  return pb
+  return pb, ubs
 end
