@@ -184,7 +184,7 @@ function dualsolve(M, nstages, risk, solver, state0, niters; verbose=false)
   init_dual(pb, state0)
   ubs = Float64[]
   for i = 1:niters
-    forward_dual(pb)
+    forward_dual(pb; normalize=true)
     backward_dual(pb)
     ub = -JuMP.objective_value(pb[1])
     push!(ubs, ub)
