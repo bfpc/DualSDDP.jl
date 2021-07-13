@@ -2,7 +2,7 @@
 include("data.jl")
 
 # Manually set parameters
-nstages = 4
+nstages = 8
 
 # Problem dimensions
 # n: state variable (stored energy, past inflows)

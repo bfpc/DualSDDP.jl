@@ -12,7 +12,7 @@ include(src * "ub.jl")
 include("hydro_hist.jl")
 beta = 0.2
 lambda = 0.3
-niters = [50, 100, 80]
+niters = [2000, 2000, 300]
 
 nstages = Hydro_Hist.nstages
 inivol  = Hydro_Hist.inivol
