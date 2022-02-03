@@ -1,6 +1,10 @@
+name = "DualSDDP"
+uuid = "7f8d178f-c40c-4e8c-bfb1-3d30c9997f30"
+authors = ["Bernardo Freitas Paulo da Costa <bernardofpc@im.ufrj.br>",
+           "Vincent Leclère <vincent.leclere@enpc.fr>"
+          ]
+version = "0.1.0"
+
 [deps]
-GLPK = "60bf3e95-4087-53dc-ae20-288a0d20c6a6"
-Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b"
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
-NPZ = "15e1cf62-19b3-5cfa-8e77-841668bca605"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"

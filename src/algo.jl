@@ -1,5 +1,3 @@
-import JuMP
-
 function choose(prob; norm=1.0)
   if norm == 0
     return rand(1:length(prob))

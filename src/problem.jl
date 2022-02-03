@@ -19,10 +19,6 @@
 #
 # where Q is the dual polyhedron for the Risk Measure \rho.
 
-using JuMP: Model, @variable, @constraint, @objective,
-            set_lower_bound, set_upper_bound, fix
-
-include("structs.jl")
 function mk_primal_decomp(M::MSLBO, T::Int, risk)
   stages = Model[]
   for t in 1:T

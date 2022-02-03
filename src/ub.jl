@@ -1,5 +1,3 @@
-import JuMP
-
 function bellman_convex_ub(stage,xs, xs_next,zs)
   # stage should be the optimization problem without any cut
   # x0 is a collection of points in the current step at which the new upper bound is computed
@@ -11,12 +9,12 @@ function bellman_convex_ub(stage,xs, xs_next,zs)
   L = stage.ext[:lip]
   n_scen = length(z)
   n_traj = length(zs)
-  JuMP.@variable(stage,s[k=1:n_traj,j=1:n_scen] >= 0) # convex combination coeff
+  @variable(stage,s[k=1:n_traj,j=1:n_scen] >= 0) # convex combination coeff
 
   for j = 1:n_scen #TODO add regularization
-    JuMP.@constraint(stage, z[j] >= sum([s[k,j]*zs[k] for k in 1:n_traj]))
-    JuMP.@constraint(stage, x[:,j] .== sum([s[k,j]*xs_next[k] for k in 1:n_traj]))
-    JuMP.@constraint(stage, sum([s[k,j] for k in 1:n_traj]) == 1)
+    @constraint(stage, z[j] >= sum([s[k,j]*zs[k] for k in 1:n_traj]))
+    @constraint(stage, x[:,j] .== sum([s[k,j]*xs_next[k] for k in 1:n_traj]))
+    @constraint(stage, sum([s[k,j] for k in 1:n_traj]) == 1)
   end
 
   ubs = []

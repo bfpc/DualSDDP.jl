@@ -1,6 +1,3 @@
-import JuMP
-using JuMP: @variable, @constraint
-
 function mk_primal_avar(beta; lambda=1.0)
   function primal_avar(m, t, ps)
     n = length(t)
@@ -13,7 +10,7 @@ function mk_primal_avar(beta; lambda=1.0)
     # end
     # JuMP.set_lower_bound.(u, 0.0)
     @constraint(m, gamma[i=1:n], z + u[i] >= t[i])
-    JuMP.@objective(m, Min, (1 - lambda)*sum(ps' * t) + lambda*z + lambda/beta*sum(ps' * u))
+    @objective(m, Min, (1 - lambda)*sum(ps' * t) + lambda*z + lambda/beta*sum(ps' * u))
   end
 end
 
