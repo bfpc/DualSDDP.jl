@@ -139,10 +139,10 @@ function primalsolve(M, nstages, risk, solver, state0, niters;
   lbs = Float64[]
   for i = 1:niters
     push!(trajs, forward(pb, state0; return_traj=true))
-    backward(pb)
     lb = JuMP.objective_value(pb[1])
     push!(lbs, lb)
     verbose && println("Iteration $i: LB = ", lb)
+    backward(pb)
   end
   if verbose
     println()
@@ -183,10 +183,10 @@ function dualsolve(M, nstages, risk, solver, state0, niters; verbose=false)
   ubs = Float64[]
   for i = 1:niters
     forward_dual(pb; normalize=true)
-    backward_dual(pb)
     ub = -JuMP.objective_value(pb[1])
     push!(ubs, ub)
     verbose && println("Iteration $i: UB = ", ub)
+    backward_dual(pb)
   end
   if verbose
     println()
