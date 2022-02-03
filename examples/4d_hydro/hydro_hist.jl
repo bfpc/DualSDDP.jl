@@ -44,8 +44,9 @@ function Ux(t::Int)
   return Maxvol
 end
 function Uy(t::Int)
+  p = (t-1)%12 + 1
   max_deficit_t = [l*d for d in demand[t] for l in deficit_levels]
-  return [Maxturb; Maxinflows[1:n,t]; GTmax .- GTmin;
+  return [Maxturb; Maxinflows[1:n,p]; GTmax .- GTmin;
           max_deficit_t; max_xch]
 end
 
