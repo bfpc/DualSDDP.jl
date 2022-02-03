@@ -1,6 +1,6 @@
-include(src * "structs.jl")
-
 module Hydro1d
+
+using DualSDDP: MSLBO
 
 function A(t::Int, i::Int)
   return reshape([1.0, 0], 2, 1)
@@ -52,6 +52,6 @@ function prob(t::Int)
   end
 end
 
-M = Main.MSLBO(A,B,T,c,d,Ux,Uy,lb,ub,Lip,prob)
+M = MSLBO(A,B,T,c,d,Ux,Uy,lb,ub,Lip,prob)
 
 end
