@@ -1,13 +1,8 @@
-maindir = "../../"
-src     = maindir * "src/"
-
 import Pkg
-Pkg.activate(maindir * "devel/")
+Pkg.activate("../")
 
-include(src * "problem.jl")
-include(src * "risk_models.jl")
-include(src * "algo.jl")
-include(src * "ub.jl")
+import JuMP
+using DualSDDP
 
 include("hydro_hist.jl")
 beta = 0.4

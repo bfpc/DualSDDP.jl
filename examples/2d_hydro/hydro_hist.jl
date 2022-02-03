@@ -1,8 +1,7 @@
-include(src * "structs.jl")
-
 module Hydro_Hist
 
 using LinearAlgebra: diagm
+using DualSDDP: MSLBO
 
 include("hydro_data.jl")
 include("hydro_demand.jl")
@@ -77,6 +76,6 @@ function prob(t::Int)
   end
 end
 
-M = Main.MSLBO(A,B,T,c,d,Ux,Uy,lb,ub,Lip,prob)
+M = MSLBO(A,B,T,c,d,Ux,Uy,lb,ub,Lip,prob)
 
 end
