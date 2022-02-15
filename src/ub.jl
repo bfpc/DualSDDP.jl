@@ -1,19 +1,24 @@
 function bellman_convex_ub(stage,xs, xs_next,zs)
   # stage should be the optimization problem without any cut
-  # x0 is a collection of points in the current step at which the new upper bound is computed
-  # xs is a collection of states at next step
+  # xs is a collection of points in the current step at which the new upper bound is computed
+  # xs_next is a collection of states at next step
   # zs is the associated upper value at xs
 
   z = stage.ext[:vars][5] # value next stage
   x = stage.ext[:vars][1]
+  state_dim = size(x,1)
   L = stage.ext[:lip]
   n_scen = length(z)
   n_traj = length(zs)
   @variable(stage,s[k=1:n_traj,j=1:n_scen] >= 0) # convex combination coeff
+  reg = @variable(stage,[1:state_dim,1:n_scen]) # regularization for each scenario
 
-  for j = 1:n_scen #TODO add regularization
-    @constraint(stage, z[j] >= sum([s[k,j]*zs[k] for k in 1:n_traj]))
-    @constraint(stage, x[:,j] .== sum([s[k,j]*xs_next[k] for k in 1:n_traj]))
+  regabs = @variable(stage,[1:state_dim,1:n_scen]) # modeling absolute value
+  @constraint(stage, regabs .>=  reg)
+  @constraint(stage, regabs .>= -reg)
+  for j = 1:n_scen
+    @constraint(stage, z[j] >= sum([s[k,j]*zs[k] for k in 1:n_traj]) + L*sum(regabs[:,j]))
+    @constraint(stage, x[:,j] .== reg[:,j] + sum([s[k,j]*xs_next[k] for k in 1:n_traj]))
     @constraint(stage, sum([s[k,j] for k in 1:n_traj]) == 1)
   end
 
