@@ -26,6 +26,26 @@ function bellman_convex_ub(stage,xs, xs_next,zs)
   for x0 in xs
     set_initial_state!(stage, x0)
     JuMP.optimize!(stage)
+    status = JuMP.primal_status(stage)
+    if status != JuMP.FEASIBLE_POINT
+      # trying to recover
+      JuMP.MOI.Utilities.reset_optimizer(stage)
+      JuMP.optimize!(stage)
+      status = JuMP.primal_status(stage)
+
+      if status != JuMP.FEASIBLE_POINT
+        JuMP.write_to_file(stage, "ub_fail.mps")
+        JuMP.write_to_file(stage, "ub_fail.lp")
+        println("Previous states:")
+        for xi in xs
+          if xi == x0
+            break
+          end
+          println(xi)
+        end
+        error("Failed to solve for initial state $(x0): status = $(status)")
+      end
+    end
     push!(ubs, JuMP.objective_value(stage))
   end
   return (ubs)
