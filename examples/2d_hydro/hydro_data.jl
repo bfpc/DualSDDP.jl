@@ -3,6 +3,7 @@ include("data_2REE.jl")
 
 # Manually set parameters
 nstages = 12
+ini_shift = 0
 
 # Problem dimensions
 # n: state variable (stored energy, past inflows)
