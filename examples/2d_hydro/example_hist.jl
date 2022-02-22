@@ -4,6 +4,8 @@ Pkg.activate("../")
 import JuMP
 using DualSDDP
 
+lip_factor = 100
+
 include("hydro_hist.jl")
 beta = 0.4
 niters = [300, 300, 300]

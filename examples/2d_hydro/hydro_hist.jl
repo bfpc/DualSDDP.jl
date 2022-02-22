@@ -65,7 +65,7 @@ function Lip(t::Int, nstages::Int)
   for t in nstages:-1:t
     tot += maximum(c(t,1))
   end
-  return tot
+  return tot*Main.lip_factor
 end
 
 function prob(t::Int)
