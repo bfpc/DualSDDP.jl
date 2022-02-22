@@ -9,6 +9,7 @@ include("problem.jl")
 include("risk_models.jl")
 include("algo.jl")
 include("ub.jl")
+include("util.jl")
 
 export MSLBO
 export mk_primal_avar, mk_copersp_avar

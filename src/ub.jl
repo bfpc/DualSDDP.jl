@@ -1,3 +1,16 @@
+# Used to show previous states before solver failure
+function debug_print(xs, x0)
+  function inner()
+    println("Previous states:")
+    for xi in xs
+      if xi == x0
+        break
+      end
+      println(xi)
+    end
+  end
+end
+
 function bellman_convex_ub(stage,xs, xs_next,zs)
   # stage should be the optimization problem without any cut
   # xs is a collection of points in the current step at which the new upper bound is computed
@@ -25,27 +38,8 @@ function bellman_convex_ub(stage,xs, xs_next,zs)
   ubs = []
   for x0 in xs
     set_initial_state!(stage, x0)
-    JuMP.optimize!(stage)
-    status = JuMP.primal_status(stage)
-    if status != JuMP.FEASIBLE_POINT
-      # trying to recover
-      JuMP.MOI.Utilities.reset_optimizer(stage)
-      JuMP.optimize!(stage)
-      status = JuMP.primal_status(stage)
-
-      if status != JuMP.FEASIBLE_POINT
-        JuMP.write_to_file(stage, "ub_fail.mps")
-        JuMP.write_to_file(stage, "ub_fail.lp")
-        println("Previous states:")
-        for xi in xs
-          if xi == x0
-            break
-          end
-          println(xi)
-        end
-        error("Failed to solve for initial state $(x0): status = $(status)")
-      end
-    end
+    opt_recover(stage, "ub_inner", "Failed to solve for initial state $(x0)",
+                extra_print=debug_print(xs, x0))
     push!(ubs, JuMP.objective_value(stage))
   end
   return (ubs)

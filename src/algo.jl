@@ -19,20 +19,7 @@ function forward(stages, state0; debug=0,return_traj =false)
   end
   for (i,stage) in enumerate(stages)
     set_initial_state!(stage, state0)
-    JuMP.optimize!(stage)
-    status = JuMP.primal_status(stage)
-    if status != JuMP.FEASIBLE_POINT
-      # trying to recover
-      JuMP.MOI.Utilities.reset_optimizer(stage)
-      JuMP.optimize!(stage)
-      status = JuMP.primal_status(stage)
-
-      if status != JuMP.FEASIBLE_POINT
-        JuMP.write_to_file(stage, "fw_fail.mps")
-        JuMP.write_to_file(stage, "fw_fail.lp")
-        error("Primal, forward: Failed to solve for $(i)-th stage.\nInitial state $(state0): status = $(status)")
-      end
-    end
+    opt_recover(stage, "primal_fw", "Primal, forward: Failed to solve for $(i)-th stage.\nInitial state $(state0)")
 
     j = choose(stage.ext[:prob])
     state0 = JuMP.value.(stage.ext[:vars][1][:,j])
@@ -64,20 +51,7 @@ function forward_dual(stages; debug=0, normalize=false)
     if i > 1
       set_initial_state!(stage, state0, gamma0)
     end
-    JuMP.optimize!(stage)
-    status = JuMP.primal_status(stage)
-    if status != JuMP.FEASIBLE_POINT
-      # trying to recover
-      JuMP.MOI.Utilities.reset_optimizer(stage)
-      JuMP.optimize!(stage)
-      status = JuMP.primal_status(stage)
-
-      if status != JuMP.FEASIBLE_POINT
-        JuMP.write_to_file(stage, "dual_fw_fail.mps")
-        JuMP.write_to_file(stage, "dual_fw_fail.lp")
-        error("Dual, forward: Failed to solve for $(i)-th stage.\nInitial state $(state0), $(gamma0): status = $(status)")
-      end
-    end
+    opt_recover(stage, "dual_fw", "Dual, forward: Failed to solve for $(i)-th stage.\nInitial state $(state0), $(gamma0)")
 
     # Regularize probabilities, so that there's a chance to sample every scenario
     gammas = JuMP.value.(stage.ext[:vars][2])
