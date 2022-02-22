@@ -3,6 +3,8 @@ Pkg.activate("../")
 
 using DualSDDP
 
+lip_factor = 100
+
 include("hydro_conf.jl")
 include("hydro.jl")
 

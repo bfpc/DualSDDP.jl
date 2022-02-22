@@ -41,7 +41,7 @@ function ub(t::Int, nstages::Int)
 end
 
 function Lip(t::Int, nstages::Int)
-  return (nstages - t + 1)*50
+  return (nstages - t + 1)*50*Main.lip_factor
 end
 
 function prob(t::Int)
