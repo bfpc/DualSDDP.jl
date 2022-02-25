@@ -86,8 +86,8 @@ function mk_dual_decomp(M::MSLBO, T::Int, dualrisk)
     set_lower_bound.(ξ,0)
     L = M.Lip(t, T)
     # Vérifier γ à la place de γ0
-    @constraint(m, π .>= -L*γ0)
-    @constraint(m, π .<=  L*γ0)
+    @constraint(m, [j=1:n], π[:,j] .>= -L*γ[j])
+    @constraint(m, [j=1:n], π[:,j] .<=  L*γ[j])
 
     for j = 1:n
       @constraint(m, γ[j]*M.c(t,j) + M.T(t,j)'*λ[:,j] + ξ[:,j] .>= 0)
