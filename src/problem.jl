@@ -95,7 +95,8 @@ function mk_dual_decomp(M::MSLBO, T::Int, dualrisk)
     end
 
     z = @variable(m, z[j=1:n])
-    set_lower_bound.(z, -M.ub(t,T))
+    ub = M.ub(t,T)
+    @constraint(m, z .>= -ub*γ)
 
     dualrisk(m, γ, prob, γ0)
 
