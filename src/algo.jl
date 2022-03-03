@@ -42,7 +42,7 @@ function init_dual(stages, x0)
   JuMP.set_objective_function(m1, o1 - m1[:π0]'*x0)
 end
 
-function forward_dual(stages; debug=0, normalize=false)
+function forward_dual(stages; debug=0, normalize=false, solvertol=1e-5)
   ϵ = 1e-2
 
   gamma0 = 1.0
@@ -56,24 +56,37 @@ function forward_dual(stages; debug=0, normalize=false)
     # Regularize probabilities, so that there's a chance to sample every scenario
     gammas = JuMP.value.(stage.ext[:vars][2])
     gammas_r = gammas .+ ϵ*gamma0
-    if debug > 0
-      println("  ", gammas)
-    end
     j = choose(gammas_r, norm=sum(gammas_r))
     state0 = JuMP.value.(stage.ext[:vars][1][:,j])
     gamma0 = gammas[j]
-    if normalize && (gamma0 != 0)
+    if normalize && (gamma0 < solvertol)
+      if debug > 0
+        println("Setting γ0 = $(gamma0) to zero, below solver tolerance $(solvertol).")
+        println("  Scenario variables:", JuMP.value.(stage[:λ][:,j]))
+        println("                    :", JuMP.value.(stage[:ξ][:,j]))
+        println("                    :", JuMP.value.(stage[:π][:,j]))
+      end
+      gamma0 = 0.0
+    end
+    if normalize && (gamma0 > solvertol)
+      if debug > 1
+        println("Normalizing γ0 = $(gamma0) to one")
+      end
       state0 ./= gamma0
-      gamma0   = 1
+      gamma0   = 1.0
     end
     if debug > 0
       println("Going out from stage $i, branch $j, state $state0, prob $gamma0")
       if debug > 1
-        println("                         local decisions: ", JuMP.value.(stage[:λ]))
+        println("                  full   local decisions: ", JuMP.value.(stage[:λ]))
         println("                                        : ", JuMP.value.(stage[:ζ]))
         println("                                        : ", JuMP.value.(stage[:ξ]))
+        println("  ", gammas)
       end
     end
+  end
+  if gamma0 == 0
+    println("Finished at gamma = 0")
   end
 end
 
