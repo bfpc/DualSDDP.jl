@@ -53,6 +53,7 @@ function mk_primal_decomp(M::MSLBO, T::Int, risk)
     m.ext[:vars] = (x, x0, y, _t, _z)
     m.ext[:prob] = prob
     m.ext[:lip]  = M.Lip(t, T)
+    m.ext[:cuts] = []
     push!(stages, m)
   end
   return stages
@@ -100,9 +101,6 @@ function mk_dual_decomp(M::MSLBO, T::Int, dualrisk)
 
     dualrisk(m, γ, prob, γ0)
 
-    m.ext[:vars] = (π, γ, π0, γ0, λ, ζ, ξ, z)
-    m.ext[:prob] = prob
-
     if t == 1
       @objective(m, Min, sum(λ[:,j]'*M.d(t,j) + ξ[:,j]'*M.Uy(t) + z[j] for j=1:n))
       @constraint(m, sum(M.B(t,j)'*λ[:,j] for j=1:n) .== π0)
@@ -118,6 +116,10 @@ function mk_dual_decomp(M::MSLBO, T::Int, dualrisk)
       @constraint(m, ζ_end .>= π)
       @constraint(m, [j=1:n], z[j] == ζ_end[:,j]'*M.Ux(t))
     end
+
+    m.ext[:vars] = (π, γ, π0, γ0, λ, ζ, ξ, z)
+    m.ext[:prob] = prob
+    m.ext[:cuts] = []
 
     push!(stages, m)
   end

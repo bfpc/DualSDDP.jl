@@ -103,6 +103,9 @@ function add_cut!(stage, next)
   for j = 1:n_scen
     JuMP.@constraint(stage, z[j] >= cst + multipliers'*(x[:,j] .- x0))
   end
+
+  # Save cut coefficients
+  push!(stage.ext[:cuts], [cst, multipliers, x0])
 end
 
 function add_cut_dual!(stage, next)
@@ -124,6 +127,9 @@ function add_cut_dual!(stage, next)
     b = min(b, 0)
     JuMP.@constraint(stage, z[j] >= b + mul_π'*π[:,j] + mul_γ*γ[j])
   end
+
+  # Save cut coefficients
+  push!(stage.ext[:cuts], [cst, mul_π, mul_γ, π0, γ0])
 end
 
 function backward(stages)
