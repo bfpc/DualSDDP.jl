@@ -51,7 +51,9 @@ plt.yscale("log");
 plt.savefig("bounds_semilog.pdf");
 
 plt.figure(figsize=(6,4));
-plt.semilogy(dual_ubs./primal_lbs .- 1);
+plt.semilogy(dual_ubs./primal_lbs .- 1, label="Dual");
+plt.axhline(y=Ubs[1,1]/primal_lbs[end] - 1, linestyle="--", color="black", label="inner")
+plt.legend()
 plt.xlabel("iteration #");
 plt.title("Relative gap");
 plt.savefig("gap.pdf");
