@@ -2,7 +2,7 @@
 include("data_2REE.jl")
 
 # Manually set parameters
-nstages = 12
+nstages = 24
 ini_shift = 0
 
 # Problem dimensions
