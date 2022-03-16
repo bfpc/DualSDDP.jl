@@ -123,9 +123,7 @@ function add_cut_dual!(stage, next)
 
   n_scen = length(z)
   for j = 1:n_scen
-    b = cst - mul_π'*π0 - mul_γ*γ0
-    b = min(b, 0)
-    JuMP.@constraint(stage, z[j] >= b + mul_π'*π[:,j] + mul_γ*γ[j])
+    JuMP.@constraint(stage, z[j] >= mul_π'*π[:,j] + mul_γ*γ[j])
   end
 
   # Save cut coefficients
