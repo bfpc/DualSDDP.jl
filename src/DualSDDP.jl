@@ -11,8 +11,12 @@ include("algo.jl")
 include("ub.jl")
 include("util.jl")
 
+include("analysis.jl")
+
 export MSLBO
 export mk_primal_avar, mk_copersp_avar
 export primalsolve, dualsolve
+
+export pvf_info, dvf_info
 
 end
