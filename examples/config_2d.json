@@ -1,0 +1,23 @@
+{
+    "save_path": "2d_cases/Lip10-12stages-82br-beta-lambda",
+
+    "experiment": {
+        "dir": "2d_hydro",
+        "Model": "hydro_hist.jl"
+    },
+
+    "parameters": {
+        "Lip": 10,
+        "nscen": 0,
+        "nstages": 12,
+        "primal_iters": 300,
+        "dual_iters": 300,
+        "start month": 1
+    },
+
+    "risk-aversion": {
+        "beta": [0.1, 0.3, 0.6],
+        "lambda": [0.0, 0.2, 0.5, 0.8, 1.0]
+    }
+
+}
