@@ -1,3 +1,5 @@
+Manifest.toml
+
 *.aux
 *.log
 *.pdf
@@ -5,3 +7,6 @@
 *.bbl
 *.out
 *.toc
+*.nav
+*.snm
+*.spl
