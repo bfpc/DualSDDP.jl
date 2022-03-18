@@ -99,7 +99,8 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64})
     save(cfg, data)
 end
 
-cfg = ConfigManager("config_2d.json", @__DIR__)
+cfg_name = ARGS[1]
+cfg = ConfigManager(cfg_name, @__DIR__)
 
 N = total_combinations(cfg)
 
