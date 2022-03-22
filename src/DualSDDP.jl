@@ -10,11 +10,12 @@ include("risk_models.jl")
 include("algo.jl")
 include("ub.jl")
 include("util.jl")
+include("Problem-Child.jl")
 
 include("analysis.jl")
 
 export MSLBO
-export mk_primal_avar, mk_copersp_avar
+export mk_primal_avar, mk_copersp_avar, mk_primal_io
 export primalsolve, dualsolve
 
 export pvf_info, dvf_info
