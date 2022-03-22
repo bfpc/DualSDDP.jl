@@ -35,7 +35,7 @@ betas = sort([betas...])
 lambdas = sort([lambdas...])
 
 nbetas = length(betas)
-fig, axs = plt.subplots(ncols=nbetas, figsize=(18,4))
+fig, axs = plt.subplots(ncols=nbetas, figsize=(18,4), sharey=true)
 for i in 1:nbetas
   b = betas[i]
   j = 0
@@ -50,3 +50,5 @@ for i in 1:nbetas
   axs[i].set_title("β = $b")
 end
 
+fig.suptitle(dir * " - Lipschitz factor: $lip_factor")
+plt.savefig(joinpath("data", "output", cfg["save_path"], "Lip$(lip_factor).pdf"))
