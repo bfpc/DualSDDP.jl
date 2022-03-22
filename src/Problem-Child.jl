@@ -38,7 +38,7 @@ function mk_primal_io(M::MSLBO, T::Int, risk)
         n_branches = length(prob)
         risk = risk
 
-        stage = IO_stage(outer,inner,prob,n_branches,risk,[],[])
+        stage = IO_stage(outer,inner,prob,n_branches,risk,Cut[],Vertex[],nothing)
         push!(stages,stage)
     end
     return stages
@@ -207,7 +207,7 @@ function compute_cut(stage::IO_stage, next_stage::IO_stage)
 end
 
 
-function add_cut!(stage, next)
+function add_cut!(stage::IO_stage, next)
     # TODO a terminer
     for j = 1:n_scen
         z = stage.ext[:vars][5]
@@ -217,7 +217,7 @@ function add_cut!(stage, next)
 end
 
 
-function backward(stages)
+function backward(stages::Vector{IO_stage})
     for i in 1:(length(stages)-1)
         add_cut!(stages[i], stages[i+1])
     end
