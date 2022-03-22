@@ -1,4 +1,5 @@
 import NPZ
 
-eafs = NPZ.npzread("../eafs.npz")["eafs"]
+fname = joinpath(@__DIR__, "..", "eafs.npz")
+eafs = NPZ.npzread(fname)["eafs"]
 eafs = eafs[:,1:40,:]
