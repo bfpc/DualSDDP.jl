@@ -4,8 +4,8 @@ Pkg.activate(".")
 import PyPlot as plt
 using Config: parse!, ConfigManager, total_combinations, load
 
-
-cfg = ConfigManager("config_2d.json", @__DIR__)
+cfg_name = ARGS[1]
+cfg = ConfigManager(cfg_name, @__DIR__)
 
 N = total_combinations(cfg)
 
