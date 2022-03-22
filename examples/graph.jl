@@ -35,6 +35,9 @@ betas = sort([betas...])
 lambdas = sort([lambdas...])
 
 nbetas = length(betas)
+nlambdas = length(lambdas)
+
+# Small multiples 1: Varying λ, keeping β fixed
 fig, axs = plt.subplots(ncols=nbetas, figsize=(18,4), sharey=true)
 for i in 1:nbetas
   b = betas[i]
@@ -52,3 +55,23 @@ end
 
 fig.suptitle(dir * " - Lipschitz factor: $lip_factor")
 plt.savefig(joinpath("data", "output", cfg["save_path"], "Lip$(lip_factor).pdf"))
+
+
+# Small multiples 2: Varying β, keeping λ fixed
+fig, axs = plt.subplots(ncols=nlambdas, figsize=(18,4), sharey=true)
+for i in 1:nlambdas
+  l = lambdas[i]
+  j = 0
+  for b in betas
+    lb, ub, inner = bounds_dict[(b,l)]
+    gap = ub./lb .- 1
+    axs[i].semilogy(gap, label=string(b), color="C$j")
+    axs[i].axhline(y=inner/lb[end] - 1, linestyle="--", color="C$j")
+    j+=1
+  end
+  axs[i].legend(title="β")
+  axs[i].set_title("λ = $l")
+end
+
+fig.suptitle(dir * " - Lipschitz factor: $lip_factor")
+plt.savefig(joinpath("data", "output", cfg["save_path"], "Lip$(lip_factor)_tr.pdf"))
