@@ -38,6 +38,13 @@ function mk_primal_io(M::MSLBO, T::Int, risk)
         n_branches = length(prob)
         risk = risk
         ub_model = mk_primal_ub_model(M, t, T)
+        if t == T 
+            for m in inner
+                JuMP.set_objective_coefficient(m,m[:_z],0)
+            end
+            m = ub_model
+            JuMP.set_objective_coefficient(m,m[:_z],0)
+        end
         stage = IO_stage(outer,inner,prob,n_branches,risk,Cut[],Vertex[],ub_model)
         push!(stages,stage)
     end
@@ -83,20 +90,18 @@ function mk_primal_ub_model(M::MSLBO, t::Int, T::Int)
     m = Model()
     @variable(m, x[i=1:nx])
     @variable(m,0 <= σ0 <= 1)
-    @variable(m,z)
-    set_lower_bound.(x,0)
-    set_upper_bound.(x,M.Ux(t))
+    @variable(m,_z)
 
     δ = @variable(m, δ[1:nx])
     δ_abs = @variable(m,δ_abs[1:nx] >= 0)
 
     @constraint(m,δ_abs.>= δ)
     @constraint(m,δ_abs.>= -δ)
-    @constraint(m,z_lb,z >= σ0*M.ub(t,T) +  M.Lip(t,T) * sum(δ_abs))
-    @constraint(m,x_cc, x .== δ)
-    @constraint(m,σ_cc, 1 == σ0)
+    @constraint(m,z_lb, σ0*M.ub(t,T) +  M.Lip(t,T) * sum(δ_abs) <= _z)
+    @constraint(m,x_cc, δ .== x)
+    @constraint(m,σ_cc, σ0 == 1)
 
-    @objective(m, Min, z)
+    @objective(m, Min, _z)
     return m
 end
 
@@ -122,17 +127,17 @@ function mk_primal_inner(M::MSLBO, t::Int, T::Int)
         set_upper_bound.(y,M.Uy(t))
 
         @constraint(m, M.A(t,j)*x + M.B(t,j)*x0 + M.T(t,j)*y .== M.d(t,j))
-        _z = @variable(m, _z)
+        @variable(m, _z)
 
         δ = @variable(m, δ[1:nx])
         δ_abs = @variable(m,δ_abs[1:nx] >= 0)
         @constraint(m,δ_abs.>= δ)
         @constraint(m,δ_abs.>= -δ)
 
-        @constraint(m,z_lb,_z >= M.Lip(t,T) * sum(δ_abs))
-        @constraint(m,x_cc, x .== δ)
-        #@variable(m,0 <= σ[1:nb_iter] <=1)
-        #@constraint(m,σ_cc, 1 == sum(σ))
+        @variable(m,0 <= σ0 <=1)
+        @constraint(m,z_lb, M.Lip(t,T) * sum(δ_abs) + σ0*M.ub(t,T) <= _z)
+        @constraint(m,x_cc, δ .== x)
+        @constraint(m,σ_cc, σ0 == 1)
 
         @objective(m, Min, M.c(t,j)'*y + _z)
 
@@ -144,14 +149,16 @@ function mk_primal_inner(M::MSLBO, t::Int, T::Int)
 end
 
 function gap(stage::IO_stage,state)
-    lb = -∞
-    for (intercept,slope) in stage.cuts
+    lb = -Inf
+    for c in stage.cuts
+        intercept = c.intercept
+        slope = c.slope
         lb = max(lb,intercept + slope'*state)
     end
 
     m = stage.ub_model
     JuMP.fix.(m[:x],state)
-    opt_recover(m, "problem_child_gap", "Primal: Failed to compute upper bound at $(state0)")
+    opt_recover(m, "problem_child_gap", "Primal: Failed to compute upper bound at $(state)")
     ub = JuMP.objective_value(m)
     return ub - lb
 end
@@ -187,31 +194,78 @@ end
 
 function forward(stages::Vector{IO_stage}, state0; debug=0)
     curr_state = state0
+    traj = [curr_state]
     for (t,stage) in enumerate(stages)
         curr_state = choose_problem_child(stage,curr_state)
-
+        push!(traj,curr_state)
         if debug > 0
             println("Going out from stage $t, state $curr_state")
         end
     end
+    return traj
 end
 
-function update_approximations(stages::Vector{IO_stage})
-    curr_state = state0
-    for (t,stage) in enumerate(stages)
-        curr_state = choose_problem_child(stage,curr_state)
-
-        if debug > 0
-            println("Going out from stage $t, state $curr_state")
-        end
+function update_approximations(stages::Vector{IO_stage},traj,solver)
+    T = length(stages)
+    for t in 1:T-1
+        next_state = traj[t+1]
+        c = compute_cut(stages[t],stages[t+1],next_state,solver)
+        add_cut!(stages[t], c)
+        v = compute_vertex(stages[t],stages[t+1],next_state,solver)
+        add_vertex!(stages[t], v)
     end
 end
 
+function compute_vertex(stage::IO_stage, next_stage::IO_stage,next_state, solver)
+    values = []
+    for next in next_stage.inner
+        set_initial_state!(next, next_state)
+        opt_recover(next, "primal_vertex_pc", "Primal, vertex: Failed to solve for initial state $(next_state)")
+        value = JuMP.objective_value(next)
+        push!(values,value)
+    end
 
-function compute_cut(stage::IO_stage, next_stage::IO_stage, solver)
+    # change of measure
+    risk = next_stage.risk
+    m = Model(solver)
+    risk(m,values,next_stage.prob)
+    JuMP.optimize!(m)
+    ra_value = JuMP.objective_value(m)
+
+    # Save vertex coefficients
+    v = Vertex(ra_value,next_state)
+    push!(stage.inner_vertices, v)
+    return v
+end
+
+function add_vertex!(stage::IO_stage, vertex::Vertex)
+    for m in stage.inner
+        add_vertex!(m,vertex)
+    end
+    add_vertex!(stage.ub_model,vertex)
+end
+
+function add_vertex!(m::JuMP.Model, vertex::Vertex)
+    σk = @variable(m)
+    set_lower_bound.(σk,0)
+    set_upper_bound.(σk,1)
+    set_normalized_coefficient(m[:σ_cc], σk, 1)
+
+    xk = vertex.point
+    for i in 1:length(xk)
+        set_normalized_coefficient(m[:x_cc][i], σk, xk[i])
+    end
+
+    vk = vertex.value
+    set_normalized_coefficient(m[:z_lb], σk, vk)
+end
+
+function compute_cut(stage::IO_stage, next_stage::IO_stage,next_state, solver)
     slopes = []
     values = []
     for next in next_stage.outer
+        set_initial_state!(next, next_state)
+        opt_recover(next, "primal_cut_pc", "Primal, cut: Failed to solve for initial state $(next_state)")
         ref = JuMP.FixRef.(next.ext[:vars][2])
         multipliers = JuMP.dual.(ref)
         value = JuMP.dual_objective_value(next)
@@ -220,162 +274,72 @@ function compute_cut(stage::IO_stage, next_stage::IO_stage, solver)
     end
 
     # change of measure
-    risk = stage.risk
+    risk = next_stage.risk
     m = Model(solver)
-    risk(m,values,stage.prob)
+    risk(m,values,next_stage.prob)
     JuMP.optimize!(m)
     ra_value = JuMP.objective_value(m)
     γs = JuMP.dual.(m[:gamma])
-    ra_slope = sum(γs[i]*slopes[i] for i in 1:stage.n_branches)
-    x0 = JuMP.value.(next_stage.outer[1][:x0])
-    ra_intercept = ra_value - ra_slope'*x0
+    ra_slope = sum(γs[i]*slopes[i] for i in 1:next_stage.n_branches)
+    ra_intercept = ra_value - ra_slope'*next_state
 
     # Save cut coefficients
     c = Cut(ra_intercept,ra_slope)
     push!(stage.cuts, c)
-    add_cut!(stage, c)
+    return c
 end
 
 function add_cut!(stage::IO_stage, cut::Cut)
     for m in stage.outer
-        z = m.ext[:vars][5]
+        #TODO : finding variables by name
+        z = m.ext[:vars][4]
         x = m.ext[:vars][1]
         JuMP.@constraint(m, z >= cut.intercept + cut.slope'*x)
     end
 end
 
 
-
-
-
-
-function backward(stages::Vector{IO_stage})
-    for i in 1:(length(stages)-1)
-        add_cut!(stages[i], stages[i+1])
-    end
-end
-
-
-function primalsolve(M, nstages, risk, solver, state0, niters;
-                     verbose=false, ub=false)
-    pb = mk_primal_decomp(M, nstages, risk)
-    for m in pb
-        JuMP.set_optimizer(m, solver)
+function problem_child_solve(M, nstages, risk, solver, state0, niters;
+                     verbose=false)
+    pb = mk_primal_io(M, nstages, risk)
+    for stage in pb
+        for m in stage.inner
+            JuMP.set_optimizer(m, solver)
+        end
+        for m in stage.outer
+            JuMP.set_optimizer(m, solver)
+        end
+        JuMP.set_optimizer(stage.ub_model, solver)
     end
 
-    println("********")
-    println(" PRIMAL ")
-    println("********")
+    println("********************")
+    println(" PROBLEM CHILD ")
+    println("********************")
     trajs = []
     lbs = Float64[]
+    p_ubs = Float64[]
     for i = 1:niters
-        push!(trajs, forward(pb, state0; return_traj=true))
-        lb = JuMP.objective_value(pb[1])
+        push!(trajs, forward(pb, state0))
+         #TODO missing first stage risk measure
+        lb = JuMP.objective_value(pb[1].outer[1])
         push!(lbs, lb)
         verbose && println("Iteration $i: LB = ", lb)
-        backward(pb)
+        update_approximations(pb,trajs[end],solver)
+        
+       
+
+        m = pb[1].inner[1]
+        set_initial_state!(m,state0)
+        opt_recover(m, "problem_child_1_st", "Primal, Upperbound: Failed to solve initial problem")
+        p_ub = JuMP.objective_value(m)
+        verbose && println("Iteration $i: P-UB =", p_ub)
+        push!(p_ubs,p_ub)
     end
     if verbose
         println()
     else
-        println("Lower bound: ", lbs[end])
+        println("Lower bound: ", lbs[end]," Upper bounds: ", p_ubs[end])
     end
+    return pb
 
-    if ub
-        println("********************")
-        println(" PRIMAL Upper Bounds")
-        println("********************")
-        stages = mk_primal_decomp(M, nstages, risk)
-        for m in stages
-            JuMP.set_optimizer(m, solver)
-        end
-        Ubs = convex_ub(stages, trajs)
-        if verbose
-            println("Recursive upper bounds on $niters trajectories")
-            display(Ubs)
-        else
-            println("Upper bound: ", maximum(Ubs[:,0]))
-        end
-        return pb, trajs, lbs, stages, Ubs
-    else
-        return pb, trajs, lbs
-    end
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function bellman_convex_ub(stage,xs, xs_next,zs)
-    # stage should be the optimization problem without any cut
-    # xs is a collection of points in the current step at which the new upper bound is computed
-    # xs_next is a collection of states at next step
-    # zs is the associated upper value at xs
-
-    z = stage.ext[:vars][5] # value next stage
-    x = stage.ext[:vars][1]
-    state_dim = size(x,1)
-    L = stage.ext[:lip]
-    n_scen = length(z)
-    n_traj = length(zs)
-    @variable(stage,s[k=1:n_traj,j=1:n_scen] >= 0) # convex combination coeff
-    reg = @variable(stage,[1:state_dim,1:n_scen]) # regularization for each scenario
-
-    regabs = @variable(stage,[1:state_dim,1:n_scen]) # modeling absolute value
-    @constraint(stage, regabs .>=  reg)
-    @constraint(stage, regabs .>= -reg)
-    for j = 1:n_scen
-        @constraint(stage, z[j] >= sum([s[k,j]*zs[k] for k in 1:n_traj]) + L*sum(regabs[:,j]))
-        @constraint(stage, x[:,j] .== reg[:,j] + sum([s[k,j]*xs_next[k] for k in 1:n_traj]))
-        @constraint(stage, sum([s[k,j] for k in 1:n_traj]) == 1)
-    end
-
-    ubs = []
-    for x0 in xs
-        set_initial_state!(stage, x0)
-        opt_recover(stage, "ub_inner", "Failed to solve for initial state $(x0)",
-                    extra_print=debug_print(xs, x0))
-        push!(ubs, JuMP.objective_value(stage))
-    end
-    return (ubs)
-end
-
-function convex_ub(stages,traj)
-    #TODO : assuming final cost to be 0
-    n_traj = length(traj)
-    T = length(stages)
-
-    Ubs = zeros((n_traj,T+1))
-
-    for i in T:-1:1
-        print("  Evaluating at stage $(i): ")
-        xs = [traj[l][i] for l in 1:n_traj]
-        xs_next = [traj[l][i+1] for l in 1:n_traj]
-        stage = stages[i]
-        Ubs[:,i] = bellman_convex_ub(stage,xs, xs_next,Ubs[:,i+1])
-        println()
-    end
-    return Ubs
-end
-

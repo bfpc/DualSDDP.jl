@@ -2,7 +2,7 @@ module DualSDDP
 
 import JuMP
 using JuMP: Model, @variable, @constraint, @objective,
-            set_lower_bound, set_upper_bound, fix
+            set_lower_bound, set_upper_bound, fix, set_normalized_coefficient
 
 include("structs.jl")
 include("problem.jl")
@@ -16,7 +16,7 @@ include("analysis.jl")
 
 export MSLBO
 export mk_primal_avar, mk_copersp_avar, mk_primal_io
-export primalsolve, dualsolve
+export primalsolve, dualsolve,problem_child_solve
 
 export pvf_info, dvf_info
 
