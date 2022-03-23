@@ -37,8 +37,8 @@ function mk_primal_io(M::MSLBO, T::Int, risk)
         prob = M.prob(t)
         n_branches = length(prob)
         risk = risk
-
-        stage = IO_stage(outer,inner,prob,n_branches,risk,Cut[],Vertex[],nothing)
+        ub_model = mk_primal_ub_model(M, t, T)
+        stage = IO_stage(outer,inner,prob,n_branches,risk,Cut[],Vertex[],ub_model)
         push!(stages,stage)
     end
     return stages
@@ -76,6 +76,28 @@ function mk_primal_outer(M::MSLBO,t::Int, T::Int)
         push!(scen_probs, m)
     end
     return scen_probs
+end
+
+function mk_primal_ub_model(M::MSLBO, t::Int, T::Int)
+    nx = size(M.A(t,1),2)
+    m = Model()
+    @variable(m, x[i=1:nx])
+    @variable(m,0 <= σ0 <= 1)
+    @variable(m,z)
+    set_lower_bound.(x,0)
+    set_upper_bound.(x,M.Ux(t))
+
+    δ = @variable(m, δ[1:nx])
+    δ_abs = @variable(m,δ_abs[1:nx] >= 0)
+
+    @constraint(m,δ_abs.>= δ)
+    @constraint(m,δ_abs.>= -δ)
+    @constraint(m,z_lb,z >= σ0*M.ub(t,T) +  M.Lip(t,T) * sum(δ_abs))
+    @constraint(m,x_cc, x .== δ)
+    @constraint(m,σ_cc, 1 == σ0)
+
+    @objective(m, Min, z)
+    return m
 end
 
 function mk_primal_inner(M::MSLBO, t::Int, T::Int)
@@ -186,35 +208,45 @@ function update_approximations(stages::Vector{IO_stage})
 end
 
 
-function compute_cut(stage::IO_stage, next_stage::IO_stage)
+function compute_cut(stage::IO_stage, next_stage::IO_stage, solver)
     slopes = []
-    intercepts = []
+    values = []
     for next in next_stage.outer
         ref = JuMP.FixRef.(next.ext[:vars][2])
-        x0 = JuMP.value.(ref)
         multipliers = JuMP.dual.(ref)
-        cst = JuMP.dual_objective_value(next)
-        intercept = cst - x0'*multipliers
+        value = JuMP.dual_objective_value(next)
         push!(slopes,multipliers)
-        push!(intercepts,intercept)
+        push!(values,value)
     end
 
-    #TODO copier change of measure de Oscar
-
+    # change of measure
+    risk = stage.risk
+    m = Model(solver)
+    risk(m,values,stage.prob)
+    JuMP.optimize!(m)
+    ra_value = JuMP.objective_value(m)
+    γs = JuMP.dual.(m[:gamma])
+    ra_slope = sum(γs[i]*slopes[i] for i in 1:stage.n_branches)
+    x0 = JuMP.value.(next_stage.outer[1][:x0])
+    ra_intercept = ra_value - ra_slope'*x0
 
     # Save cut coefficients
-    push!(stage.ext[:cuts], Cut(ra_intercept,ra_slope))
+    c = Cut(ra_intercept,ra_slope)
+    push!(stage.cuts, c)
+    add_cut!(stage, c)
 end
 
-
-function add_cut!(stage::IO_stage, next)
-    # TODO a terminer
-    for j = 1:n_scen
-        z = stage.ext[:vars][5]
-        x = stage.ext[:vars][1]
-        JuMP.@constraint(stage, z[j] >= cst + multipliers'*(x[:,j] .- x0))
+function add_cut!(stage::IO_stage, cut::Cut)
+    for m in stage.outer
+        z = m.ext[:vars][5]
+        x = m.ext[:vars][1]
+        JuMP.@constraint(m, z >= cut.intercept + cut.slope'*x)
     end
 end
+
+
+
+
 
 
 function backward(stages::Vector{IO_stage})
