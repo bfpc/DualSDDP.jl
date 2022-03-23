@@ -90,7 +90,7 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64})
 
     #Compute primal ub
     ub_step = params["ub_step"]
-    ubs_p = primalub(M, nstages, risk,trajs,ub_step:ub_step:params["primal_iters"];verbose=true)
+    ubs_p = DualSDDP.primalub(M, nstages, risk,solver,primal_trajs,ub_step:ub_step:params["primal_iters"];verbose=true)
 
     # Saving info
     data = Dict()

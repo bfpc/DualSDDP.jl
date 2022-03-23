@@ -168,14 +168,14 @@ function primalsolve(M, nstages, risk, solver, state0, niters;
   end
 
   if ub
-    Ubs = primalub(M, nstages, risk,trajs,niters;verbose=verbose)
+    Ubs = primalub(M, nstages, risk,solver,trajs,niters;verbose=verbose)
     return pb, trajs, lbs, Ubs
   else
     return pb, trajs, lbs
   end
 end
 
-function primalub(M, nstages, risk,trajs,niters::Int;verbose=false)
+function primalub(M, nstages, risk,solver, trajs,niters::Int;verbose=false)
   println("******************************************")
   println(" PRIMAL Upper Bounds at $niters iteration")
   println("******************************************")
@@ -193,7 +193,7 @@ function primalub(M, nstages, risk,trajs,niters::Int;verbose=false)
   return Ubs
 end
 
-function primalub(M, nstages, risk,trajs,niters;verbose = false)
+function primalub(M, nstages, risk,solver,trajs,niters;verbose = false)
   if verbose
     println("********")
     println(" PRIMAL UB")

@@ -53,12 +53,12 @@ function convex_ub(stages,traj)
     Ubs = zeros((n_traj,T+1))
 
     for i in T:-1:1
-      print("  Evaluating at stage $(i): ")
+      #print("  Evaluating at stage $(i): ")
       xs = [traj[l][i] for l in 1:n_traj]
       xs_next = [traj[l][i+1] for l in 1:n_traj]
       stage = stages[i]
       Ubs[:,i] = bellman_convex_ub(stage,xs, xs_next,Ubs[:,i+1])
-      println()
+      #println()
     end
     return Ubs
 end
