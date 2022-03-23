@@ -86,13 +86,17 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64})
 
     # Primal with interior bounds
     seed!(2)
-    primal_pb, primal_trajs, primal_lbs, primal_aux, Ubs = primalsolve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true, ub=true)
+    primal_pb, primal_trajs, primal_lbs = primalsolve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true, ub=false)
+
+    #Compute primal ub
+    ub_step = params["ub_step"]
+    ubs_p = primalub(M, nstages, risk,trajs,ub_step:ub_step:params["primal_iters"];verbose=true)
 
     # Saving info
     data = Dict()
     data["lb"]    = primal_lbs
     data["ub"]    = dual_ubs
-    data["inner"] = Ubs
+    data["inner"] = ubs_p
 
     save_vfs!(data, primal_pb, dual_pb)
 

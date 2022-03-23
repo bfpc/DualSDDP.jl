@@ -12,6 +12,7 @@
         "nstages": 12,
         "primal_iters": 300,
         "dual_iters": 300,
+        "ub_step":25,
         "start month": 1
     },
 

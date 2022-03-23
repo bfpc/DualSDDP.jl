@@ -11,6 +11,7 @@
         "nscen": 0,
         "nstages": 24,
         "primal_iters": 300,
+        "ub_step":25,
         "dual_iters": 300,
         "start month": 1
     },

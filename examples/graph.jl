@@ -26,7 +26,7 @@ for idx=1:N
     beta   = cfg["risk-aversion"]["beta"]
     lambda = cfg["risk-aversion"]["lambda"]
 
-    bounds_dict[(beta,lambda)] = (data["lb"], data["ub"], data["inner"][1][1])
+    bounds_dict[(beta,lambda)] = (data["lb"], data["ub"], data["inner"])
     push!(betas, beta)
     push!(lambdas, lambda)
 end
@@ -46,7 +46,7 @@ for i in 1:nbetas
     lb, ub, inner = bounds_dict[(b,l)]
     gap = ub./lb .- 1
     axs[i].semilogy(gap, label=string(l), color="C$j")
-    axs[i].axhline(y=inner/lb[end] - 1, linestyle="--", color="C$j")
+    axs[i].semilogy(first.(inner), last.(inner)./lb[first.(inner)] .- 1, linestyle="--", color="C$j")
     j+=1
   end
   axs[i].legend(title="λ")
@@ -66,7 +66,7 @@ for i in 1:nlambdas
     lb, ub, inner = bounds_dict[(b,l)]
     gap = ub./lb .- 1
     axs[i].semilogy(gap, label=string(b), color="C$j")
-    axs[i].axhline(y=inner/lb[end] - 1, linestyle="--", color="C$j")
+    axs[i].semilogy(first.(inner), last.(inner)./lb[first.(inner)] .- 1, linestyle="--", color="C$j")
     j+=1
   end
   axs[i].legend(title="β")

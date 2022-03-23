@@ -168,25 +168,51 @@ function primalsolve(M, nstages, risk, solver, state0, niters;
   end
 
   if ub
-    println("********************")
-    println(" PRIMAL Upper Bounds")
-    println("********************")
-    stages = mk_primal_decomp(M, nstages, risk)
-    for m in stages
-      JuMP.set_optimizer(m, solver)
-    end
-    Ubs = convex_ub(stages, trajs)
-    if verbose
-      println("Recursive upper bounds on $niters trajectories")
-      display(Ubs)
-    else
-      println("Upper bound: ", maximum(Ubs[:,0]))
-    end
-    return pb, trajs, lbs, stages, Ubs
+    Ubs = primalub(M, nstages, risk,trajs,niters;verbose=verbose)
+    return pb, trajs, lbs, Ubs
   else
     return pb, trajs, lbs
   end
 end
+
+function primalub(M, nstages, risk,trajs,niters::Int;verbose=false)
+  println("******************************************")
+  println(" PRIMAL Upper Bounds at $niters iteration")
+  println("******************************************")
+  stages = mk_primal_decomp(M, nstages, risk)
+  for m in stages
+    JuMP.set_optimizer(m, solver)
+  end
+  Ubs = convex_ub(stages, trajs)
+  if verbose
+    println("Recursive upper bounds on $niters trajectories")
+    display(Ubs)
+  else
+    println("Upper bound: ", maximum(Ubs[:,0]))
+  end
+  return Ubs
+end
+
+function primalub(M, nstages, risk,trajs,niters;verbose = false)
+  if verbose
+    println("********")
+    println(" PRIMAL UB")
+    println("********")
+  end
+  ub = Tuple{Int,Float64}[]
+  for n in niters
+    stages = mk_primal_decomp(M, nstages, risk)
+    for m in stages
+      JuMP.set_optimizer(m, solver)
+    end
+    Ubs = convex_ub(stages, trajs[1:n])
+    verbose && println("Primal upperbound at iteration $n: $(Ubs[1,1])")
+    push!(ub,(n,Ubs[1,1]))
+  end
+  return ub
+end
+
+
 
 function dualsolve(M, nstages, risk, solver, state0, niters; verbose=false)
   pb = mk_dual_decomp(M, nstages, risk)
