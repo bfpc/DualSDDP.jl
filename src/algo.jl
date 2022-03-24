@@ -108,6 +108,16 @@ function add_cut!(stage, next)
   push!(stage.ext[:cuts], [cst, multipliers, x0])
 end
 
+function compute_cut(stage, next, next_state::Vector{Float64})
+  set_initial_state!(next, next_state)
+  opt_recover(next, "primal_cut", "Primal, risk-cut: Failed to solve for initial state $(next_state)")
+  ref = JuMP.FixRef.(next.ext[:vars][2])
+  multipliers = JuMP.dual.(ref)
+  cst = JuMP.dual_objective_value(next)
+
+  return [cst, multipliers, next_state, cst - multipliers'*next_state]
+end
+
 function add_cut_dual!(stage, next)
   ref_π = JuMP.FixRef.(next.ext[:vars][3])
   ref_γ = JuMP.FixRef.(next.ext[:vars][4])
