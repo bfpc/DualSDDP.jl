@@ -27,6 +27,9 @@ solver = JuMP.optimizer_with_attributes(() -> Gurobi.Optimizer(env), "OutputFlag
 #####################
 # Solution algorithms
 
+#problem child
+problem_child_solve(Hydro_Hist.M, nstages, risk, solver, inivol, niters[1]; verbose=true)
+
 # Pure dual
 using Random: seed!
 seed!(3)

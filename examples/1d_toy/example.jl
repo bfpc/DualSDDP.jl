@@ -20,6 +20,8 @@ import GLPK
 solver = GLPK.Optimizer
 
 # Solution algorithms
+problem_child_solve(Hydro1d.M, nstages, risk, solver, [inivol], niters; verbose=true)
+
 # Pure primal
 primalsolve(Hydro1d.M, nstages, risk, solver, [inivol], niters; verbose=true)
 
