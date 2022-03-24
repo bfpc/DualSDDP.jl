@@ -323,7 +323,7 @@ function problem_child_solve(M, nstages, risk, solver, state0, niters;
          #TODO missing first stage risk measure
         lb = JuMP.objective_value(pb[1].outer[1])
         push!(lbs, lb)
-        verbose && println("Iteration $i: LB = ", lb)
+        verbose && print("Iteration $i: LB = ", lb)
         update_approximations(pb,trajs[end],solver)
         
        
@@ -332,7 +332,7 @@ function problem_child_solve(M, nstages, risk, solver, state0, niters;
         set_initial_state!(m,state0)
         opt_recover(m, "problem_child_1_st", "Primal, Upperbound: Failed to solve initial problem")
         p_ub = JuMP.objective_value(m)
-        verbose && println("Iteration $i: P-UB =", p_ub)
+        verbose && println(" P-UB = ", p_ub)
         push!(p_ubs,p_ub)
     end
     if verbose
