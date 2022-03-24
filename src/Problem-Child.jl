@@ -280,6 +280,7 @@ function compute_cut(stage::IO_stage, next_stage::IO_stage,next_state, solver)
     JuMP.optimize!(m)
     ra_value = JuMP.objective_value(m)
     γs = JuMP.dual.(m[:gamma])
+    γs .+= next_stage.prob * (1 - sum(γs)) # Expectation, TODO: improve
     ra_slope = sum(γs[i]*slopes[i] for i in 1:next_stage.n_branches)
     ra_intercept = ra_value - ra_slope'*next_state
 
