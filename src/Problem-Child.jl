@@ -26,7 +26,7 @@ struct IO_stage
     risk :: Function
     cuts :: Vector{Cut}
     inner_vertices :: Vector{Vertex}
-    ub_model
+    ub_model :: JuMP.Model
 end
 
 function mk_primal_io(M::MSLBO, T::Int, risk)
