@@ -273,15 +273,17 @@ function compute_cut(stage::IO_stage, next_stage::IO_stage,next_state, solver)
         push!(values,value)
     end
 
+    n = next_stage.n_branches
     # change of measure
     risk = next_stage.risk
     m = Model(solver)
-    risk(m,values,next_stage.prob)
+    @variable(m, t[1:n])
+    @constraint(m, delta, t .>= values)
+    risk(m,t,next_stage.prob)
     JuMP.optimize!(m)
     ra_value = JuMP.objective_value(m)
-    γs = JuMP.dual.(m[:gamma])
-    γs .+= next_stage.prob * (1 - sum(γs)) # Expectation, TODO: improve
-    ra_slope = sum(γs[i]*slopes[i] for i in 1:next_stage.n_branches)
+    γs = JuMP.dual.(delta)
+    ra_slope = sum(γs[i]*slopes[i] for i in 1:n)
     ra_intercept = ra_value - ra_slope'*next_state
 
     # Save cut coefficients
