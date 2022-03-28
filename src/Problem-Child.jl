@@ -30,6 +30,12 @@ struct IO_stage
 end
 # TODO: constructor
 
+import Base.show
+function show(io::IO, ::MIME"text/plain", s::DualSDDP.IO_stage)
+  println(io, "A $(s.n_branches)-branch stage,")
+  println(io, "  with probabilities $(s.prob)")
+  print(  io, "  and state dimension $(length(s.outer[1][:x]))")
+end
 
 function mk_primal_io(M::MSLBO, T::Int, risk)
     stages = IO_stage[]
