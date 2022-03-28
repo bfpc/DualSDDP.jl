@@ -1,6 +1,12 @@
 Code
 ====
 
+Typing
+  Cuts / stages / ...
+  Values saved in the algorithms
+
+Constructor for IO_stage
+
 Config.jl
   Bugs write()
   Bugs example.jl etc

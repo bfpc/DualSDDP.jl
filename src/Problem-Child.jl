@@ -28,6 +28,8 @@ struct IO_stage
     inner_vertices :: Vector{Vertex}
     ub_model :: JuMP.Model
 end
+# TODO: constructor
+
 
 function mk_primal_io(M::MSLBO, T::Int, risk)
     stages = IO_stage[]
