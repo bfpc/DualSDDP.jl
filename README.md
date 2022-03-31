@@ -28,3 +28,21 @@ It also implements, for comparison:
 
 The `examples` directory contains both "one shot" examples (in subdirectories),
 as well as `Config.jl` batches and configs.
+
+The first time you use the examples directory, you'll have to instantiate it.
+The fastest way of doing so is using `Pkg` commands (in the `examples` directory):
+
+
+```julia
+pkg> activate .
+pkg> dev ..
+```
+
+This will use the `Project.toml` we provide,
+then the current checkout for the `DualSDDP` package,
+and finally resolve all packages.
+
+In so doing, it will also require that the `Gurobi` package is installed,
+which was used for some of the examples.
+If that is not desired, one can remove it from the `Packages.toml` file,
+or simply issue `pkg> rm Gurobi`.
