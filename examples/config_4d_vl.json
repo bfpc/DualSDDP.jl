@@ -1,0 +1,23 @@
+{
+    "save_path": "4d_cases/Lip10-24stages-82br-beta-lambda-1000",
+
+    "experiment": {
+        "dir": "4d_hydro",
+        "Model": "hydro_hist.jl"
+    },
+
+    "parameters": {
+        "Lip": 10,
+        "nscen": 0,
+        "nstages": 24,
+        "primal_iters": 1000,
+        "dual_iters": 1000,
+        "start month": 1
+    },
+
+    "risk-aversion": {
+        "beta": [ 0.5],
+        "lambda": [0.5]
+    }
+
+}
