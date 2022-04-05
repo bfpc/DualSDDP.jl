@@ -37,7 +37,7 @@ dual_pb, dual_ubs = dualsolve(Hydro_Hist.M, nstages, risk_dual, solver, inivol, 
 
 # Primal with interior bounds
 seed!(2)
-primal_pb, primal_trajs, primal_lbs, primal_aux, Ubs = primalsolve(Hydro_Hist.M, nstages, risk, solver, inivol, niters[3]; verbose=true, ub=true)
+primal_pb, primal_trajs, primal_lbs, Ubs = primalsolve(Hydro_Hist.M, nstages, risk, solver, inivol, niters[3]; verbose=true, ub=true)
 
 ###################
 # Graphs and bounds
