@@ -1,6 +1,8 @@
 Code
 ====
 
+Use same parameters as paper (\lambda -> 1-\lambda)
+
 Typing
   Cuts / stages / ...
   Values saved in the algorithms
@@ -10,4 +12,9 @@ Constructor for IO_stage
 Config.jl
   Bugs write()
   Bugs example.jl etc
-  Sauvegarder les paramètres (ou ne jamais changer .json)
+  Save
+    * Trajectories
+    * Cuts + Vertices
+    * Time / iteration
+    * lower / upper bounds
+    * parameters (lambda, alpha, lip-factor, ...)
