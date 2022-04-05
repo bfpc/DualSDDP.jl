@@ -1,5 +1,5 @@
 {
-    "save_path": "4d_cases/Lip100-12stages-82br-beta-lambda",
+    "save_path": "4d_cases/Lip100-12stages-82br-alpha-beta",
 
     "experiment": {
         "dir": "4d_hydro",
@@ -17,8 +17,8 @@
     },
 
     "risk-aversion": {
-        "beta": [0.1, 0.3, 0.6],
-        "lambda": [0.0, 0.2, 0.5, 0.8, 1.0]
+        "alpha": [0.1, 0.3, 0.6],
+        "beta": [0.0, 0.2, 0.5, 0.8, 1.0]
     }
 
 }

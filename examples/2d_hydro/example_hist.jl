@@ -10,15 +10,15 @@ using DualSDDP
 lip_factor = 1
 
 include("hydro_hist.jl")
-beta = 0.4
-lambda = 0.7
+alpha = 0.4
+beta = 0.7
 niters = [300, 300, 300]
 
 nstages = Hydro_Hist.nstages
 inivol  = Hydro_Hist.inivol
 
-risk      = mk_primal_avar(beta; lambda=lambda)
-risk_dual = mk_copersp_avar(beta; lambda=lambda)
+risk      = mk_primal_avar(alpha; beta=beta)
+risk_dual = mk_copersp_avar(alpha; beta=beta)
 
 import Gurobi
 env = Gurobi.Env()

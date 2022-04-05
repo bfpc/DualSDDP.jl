@@ -69,11 +69,11 @@ end
 function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64})
     # Risk Aversion
     ra     = cfg["risk-aversion"]
+    alpha  = ra["alpha"]
     beta   = ra["beta"]
-    lambda = ra["lambda"]
 
-    risk      = mk_primal_avar(beta; lambda=lambda)
-    risk_dual = mk_copersp_avar(beta; lambda=lambda)
+    risk      = mk_primal_avar(alpha; beta=beta)
+    risk_dual = mk_copersp_avar(alpha; beta=beta)
 
     # Other parameters
     params  = cfg["parameters"]
