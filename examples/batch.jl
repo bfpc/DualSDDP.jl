@@ -44,6 +44,15 @@ function save_vfs!(data, primal_pb, dual_pb)
     dual_VFs = [dvf_info(stage) for stage in dual_pb]
     dual_iters = length(dual_VFs[1])
 
+    # (t,k) = k-th intercept at t-th stage
+    intercepts = Array{Float64}(undef, nstages-1, dual_iters)
+    for t = 1:nstages-1
+      for k = 1:dual_iters
+        intercepts[t,k] = dual_VFs[t][k][1]
+      end
+    end
+    data["dual VF intercepts"] = intercepts
+
     # (t,k) = k-th gamma coefficient at t-th stage
     mul_γ = Array{Float64}(undef, nstages-1, dual_iters)
     for t = 1:nstages-1
@@ -51,7 +60,7 @@ function save_vfs!(data, primal_pb, dual_pb)
         mul_γ[t,k] = dual_VFs[t][k][3]
       end
     end
-    data["dual VF mul gamma"] = intercepts
+    data["dual VF mul gamma"] = mul_γ
 
     # (t,k,j) = coefficient of j-th variable, in k-th cut, at t-th stage
     stagedim = length(dual_VFs[1][1][2])
@@ -94,9 +103,10 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64})
 
     # Saving info
     data = Dict()
-    data["lb"]    = primal_lbs
-    data["ub"]    = dual_ubs
-    data["inner"] = ubs_p
+    data["primal lb"] = primal_lbs
+    data["dual ub"]   = dual_ubs
+    data["inner recursive iters"] = first.(ubs_p)
+    data["inner recursive bound"] = last.(ubs_p)
 
     save_vfs!(data, primal_pb, dual_pb)
 

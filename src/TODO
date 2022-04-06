@@ -8,7 +8,6 @@ Typing
 Constructor for IO_stage
 
 Config.jl
-  Bugs write()
   Bugs example.jl etc
   Save
     * Trajectories
