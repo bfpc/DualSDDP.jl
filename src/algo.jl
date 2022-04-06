@@ -143,11 +143,11 @@ the state at which the cut is computed is stored in next.ext
 """
 function add_cut_dual!(stage, next)
   ref_π = JuMP.FixRef.(next.ext[:vars][3])
-  ref_γ = JuMP.FixRef.(next.ext[:vars][4])
+  ref_γ = JuMP.FixRef(next.ext[:vars][4])
   π0 = JuMP.value.(ref_π)
   γ0 = JuMP.value(ref_γ)
   mul_π = JuMP.dual.(ref_π)
-  mul_γ = JuMP.dual.(ref_γ)
+  mul_γ = JuMP.dual(ref_γ)
   cst = JuMP.dual_objective_value(next)
 
   z = stage.ext[:vars][8]
