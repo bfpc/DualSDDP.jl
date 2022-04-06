@@ -121,7 +121,8 @@ end
 
 
 
-function dual_value_function(stage, ub, Lip; tol=1e-6, maxcuts=nothing)
+function dual_value_function(stage, ub, Lip;
+                             tol=1e-6, maxcuts=nothing, verbose=false)
   nx = size(stage[:π],1)
 
   vf = Model()
@@ -142,11 +143,11 @@ function dual_value_function(stage, ub, Lip; tol=1e-6, maxcuts=nothing)
     cst, mul_π, mul_γ, π0, γ0 = cut.value, cut.slope_π, cut.slope_γ, cut.π0, cut.γ0
     b = cst - mul_π'*π0 - mul_γ*γ0
     if b > 0
-      println("Cut with positive intercept $(b), truncating")
+      verbose && println("Cut with positive intercept $(b), truncating")
       b = 0.0
     end
     if b < -tol
-      println("Cut with negative intercept $(b)")
+      verbose && println("Cut with negative intercept $(b)")
     end
     @constraint(vf, z >= b + mul_π'*π + mul_γ * γ)
   end
@@ -173,7 +174,7 @@ function eval_df(df, x1s, x2s)
 end
 
 # function dual_value_function(stage, ub, Lip; tol=1e-6, maxcuts=nothing)
-function dvf_info(stage; maxcuts=nothing, tol=1e-6)
+function dvf_info(stage; maxcuts=nothing, tol=1e-6, verbose=false)
   cuts = stage.ext[:cuts]
   if maxcuts != nothing
     cuts = cuts[1:maxcuts]
@@ -184,11 +185,11 @@ function dvf_info(stage; maxcuts=nothing, tol=1e-6)
     cst, mul_π, mul_γ, π0, γ0 = cut.value, cut.slope_π, cut.slope_γ, cut.π0, cut.γ0
     b = cst - mul_π'*π0 - mul_γ*γ0
     if b > 0
-      println("Cut with positive intercept $(b), truncating")
+      verbose && println("Cut with positive intercept $(b), truncating")
       b = 0.0
     end
     if b < -tol
-      println("Cut with negative intercept $(b)")
+      verbose && println("Cut with negative intercept $(b)")
     end
     push!(coefs, (b, mul_π, mul_γ))
   end
