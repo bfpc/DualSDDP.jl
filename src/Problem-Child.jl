@@ -384,8 +384,6 @@ function problem_child_solve(M, nstages, risk, solver, state0, niters;
         push!(lbs, lb)
         verbose && print("Iteration $i: LB = ", lb)
         update_approximations(pb,trajs[end],solver)
-        
-       
 
         m = pb[1].inner[1]
         set_initial_state!(m,state0)
@@ -399,6 +397,5 @@ function problem_child_solve(M, nstages, risk, solver, state0, niters;
     else
         println("Lower bound: ", lbs[end]," Upper bounds: ", p_ubs[end])
     end
-    return pb
-
+    return pb, lbs, p_ubs
 end
