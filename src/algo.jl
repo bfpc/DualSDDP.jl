@@ -227,7 +227,7 @@ at given niters iteration
 """
 function primalub(M, nstages, risk,solver, trajs,niters::Int;verbose=false)
   println("******************************************")
-  println(" PRIMAL Upper Bounds at $niters iteration")
+  println(" PRIMAL Upper Bounds at $niters iterations")
   println("******************************************")
   stages = mk_primal_decomp(M, nstages, risk)
   for m in stages
