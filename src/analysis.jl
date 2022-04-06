@@ -21,7 +21,7 @@ function primal_value_function(stage; maxcuts=nothing)
     cuts = cuts[1:maxcuts]
   end
   for cut in cuts
-    cst, multipliers, x0 = cut
+    cst, multipliers, x0 = cut.value, cut.slope, cut.x0
     @constraint(vf, z >= cst + multipliers'*(x .- x0))
   end
 
@@ -56,7 +56,7 @@ function pvf_info(stage; maxcuts=nothing)
   end
   coefs = Tuple{Float64, Vector{Float64}}[]
   for cut in cuts
-    cst, multipliers, x0 = cut
+    cst, multipliers, x0 = cut.value, cut.slope, cut.x0
     push!(coefs, (cst - dot(multipliers, x0), multipliers))
   end
   return coefs, lb
@@ -139,7 +139,7 @@ function dual_value_function(stage, ub, Lip; tol=1e-6, maxcuts=nothing)
     cuts = cuts[1:maxcuts]
   end
   for cut in cuts
-    cst, mul_π, mul_γ, π0, γ0 = cut
+    cst, mul_π, mul_γ, π0, γ0 = cut.value, cut.slope_π, cut.slope_γ, cut.π0, cut.γ0
     b = cst - mul_π'*π0 - mul_γ*γ0
     if b > 0
       println("Cut with positive intercept $(b), truncating")
@@ -181,7 +181,7 @@ function dvf_info(stage; maxcuts=nothing, tol=1e-6)
   # Constant, π multiplier, γ multiplier
   coefs = Tuple{Float64, Vector{Float64}, Float64}[]
   for cut in cuts
-    cst, mul_π, mul_γ, π0, γ0 = cut
+    cst, mul_π, mul_γ, π0, γ0 = cut.value, cut.slope_π, cut.slope_γ, cut.π0, cut.γ0
     b = cst - mul_π'*π0 - mul_γ*γ0
     if b > 0
       println("Cut with positive intercept $(b), truncating")

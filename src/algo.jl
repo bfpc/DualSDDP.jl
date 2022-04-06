@@ -119,7 +119,7 @@ function add_cut!(stage, next)
   end
 
   # Save cut coefficients
-  push!(stage.ext[:cuts], [cst, multipliers, x0])
+  push!(stage.ext[:cuts], PrimalCut(cst, multipliers, x0))
 end
 
 
@@ -160,7 +160,7 @@ function add_cut_dual!(stage, next)
   end
 
   # Save cut coefficients
-  push!(stage.ext[:cuts], [cst, mul_π, mul_γ, π0, γ0])
+  push!(stage.ext[:cuts], DualCut(cst, mul_π, mul_γ, π0, γ0))
 end
 
 """ Perform a primal backward pass """
