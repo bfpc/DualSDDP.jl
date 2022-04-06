@@ -2,6 +2,7 @@
 nstages = 4
 beta    = 0.4
 niters  = 40
+ub_step = 10
 
 # Uncertainty
 import Random

@@ -16,7 +16,7 @@ include("analysis.jl")
 
 export MSLBO
 export mk_primal_avar, mk_copersp_avar, mk_primal_io
-export primalsolve, dualsolve,problem_child_solve
+export primalsolve, dualsolve, problem_child_solve, primalub
 
 export pvf_info, dvf_info
 
