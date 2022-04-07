@@ -6,6 +6,7 @@ ub_step = 10
 
 p = 0.3
 
+using LinearAlgebra: diagm
 nscen = 10
 
 dim = 20 
