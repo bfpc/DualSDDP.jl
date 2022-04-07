@@ -10,8 +10,8 @@ include("hydro_conf.jl")
 include("hydro.jl")
 
 
-risk      = mk_primal_avar(beta)
-risk_dual = mk_copersp_avar(beta)
+risk      = mk_primal_avar(alpha)
+risk_dual = mk_copersp_avar(alpha)
 
 
 # import Gurobi
