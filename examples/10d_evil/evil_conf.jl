@@ -1,7 +1,8 @@
 # Parameters
 nstages = 20
-beta    = 0.4
+alpha   = 0.4
 niters  = 100
+ub_step = 10
 
 p = 0.3
 
