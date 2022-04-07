@@ -274,7 +274,6 @@ nstages is the horizon of the problem
 risk is a function building the risk measure
 state0 is the initial state
 niters is the number of iterations ran before stopping
-
 """
 function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters; verbose=false)
   pb = mk_dual_decomp(M, nstages, risk)
