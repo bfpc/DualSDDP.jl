@@ -101,12 +101,19 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64})
     ub_step = params["ub_step"]
     ubs_p = DualSDDP.primalub(M, nstages, risk,solver,primal_trajs,ub_step:ub_step:params["primal_iters"];verbose=true)
 
+    # Primal with inner and outer bounds
+    seed!(4)
+    io_pb, io_lbs, io_ubs = problem_child_solve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true)
+
+
     # Saving info
     data = Dict()
     data["primal lb"] = primal_lbs
     data["dual ub"]   = dual_ubs
     data["inner recursive iters"] = first.(ubs_p)
     data["inner recursive bound"] = last.(ubs_p)
+    data["io lb"] = io_lbs
+    data["io ub"] = io_ubs
 
     save_vfs!(data, primal_pb, dual_pb)
 
