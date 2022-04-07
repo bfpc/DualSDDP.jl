@@ -97,9 +97,10 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64})
     seed!(2)
     primal_pb, primal_trajs, primal_lbs = primalsolve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true, ub=false)
 
-    #Compute primal ub
+    # Compute ub from primal trajectories "à la Philpott et al."
     ub_step = params["ub_step"]
-    ubs_p = DualSDDP.primalub(M, nstages, risk,solver,primal_trajs,ub_step:ub_step:params["primal_iters"];verbose=true)
+    iters_ub = ub_step:ub_step:params["primal_iters"]
+    ubs_p = primalub(M, nstages, risk, solver, primal_trajs, iters_ub; verbose=true)
 
     # Primal with inner and outer bounds
     seed!(4)
@@ -108,6 +109,7 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64})
 
     # Saving info
     data = Dict()
+    #   Bounds
     data["primal lb"] = primal_lbs
     data["dual ub"]   = dual_ubs
     data["inner recursive iters"] = first.(ubs_p)
