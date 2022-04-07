@@ -19,6 +19,7 @@
 #
 # where Q is the dual polyhedron for the Risk Measure \rho.
 
+""" Build the initial primal JuMP model for each stage"""
 function mk_primal_decomp(M::MSLBO, T::Int, risk)
   stages = Model[]
   for t in 1:T
@@ -59,11 +60,13 @@ function mk_primal_decomp(M::MSLBO, T::Int, risk)
   return stages
 end
 
+""" set the initial state of a given stage"""
 function set_initial_state!(stage::Model, x0::Vector{T}) where T <: Real
   fix.(stage.ext[:vars][2], x0)
   return
 end
 
+""" Build the initial dual JuMP model for each stage"""
 function mk_dual_decomp(M::MSLBO, T::Int, dualrisk)
   stages = Model[]
   for t in 1:T
@@ -127,6 +130,7 @@ function mk_dual_decomp(M::MSLBO, T::Int, dualrisk)
   return stages
 end
 
+""" Set initial dual state """
 function set_initial_state!(stage::Model, π0::Vector{T}, γ0::Real) where T <: Real
   fix.(stage.ext[:vars][3], π0)
   fix(stage.ext[:vars][4], γ0)

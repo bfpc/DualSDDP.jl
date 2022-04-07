@@ -2,6 +2,8 @@ import JuMP
 using JuMP: Model, @variable, @constraint, @objective
 using LinearAlgebra: dot
 
+""" Return a JuMP model with the primal value function
+based on stored cuts"""
 function primal_value_function(stage; maxcuts=nothing)
   nx = size(stage[:x],1)
   ub_x = JuMP.upper_bound.(stage[:x][:,1])
@@ -28,6 +30,7 @@ function primal_value_function(stage; maxcuts=nothing)
   return vf
 end
 
+""" For plotting purpose in 2D """
 function eval_vf(vf, x1s, x2s)
   n1 = length(x1s)
   n2 = length(x2s)

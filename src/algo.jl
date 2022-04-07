@@ -1,3 +1,4 @@
+" Randomly choose an index according to probability prob"
 function choose(prob; norm=1.0)
   if norm == 0
     return rand(1:length(prob))
@@ -13,6 +14,7 @@ function choose(prob; norm=1.0)
   return length(prob)
 end
 
+"Make a forward primal pass starting from state0"
 function forward(stages, state0; debug=0,return_traj =false)
   if return_traj
     traj=[state0]
@@ -35,15 +37,20 @@ function forward(stages, state0; debug=0,return_traj =false)
 end
 
 
-
+"Modify objective function of first dual stage to account for initial state decision"
 function init_dual(stages, x0)
   m1 = stages[1]
   o1 = JuMP.objective_function(m1)
   JuMP.set_objective_function(m1, o1 - m1[:π0]'*x0)
 end
 
-function forward_dual(stages; debug=0, normalize=false, solvertol=1e-5)
-  ϵ = 1e-2
+""" Make a foward pass in the dual
+
+epsilon is a regularization parameter that guarantee selection of all nodes we positive probability
+normalize the cut to γ=1 if γ > 0.
+"""
+function forward_dual(stages; debug=0, normalize=false, solvertol=1e-5, epsilon = 1e-2)
+  ϵ = epsilon 
 
   gamma0 = 1.0
   state0 = Float64[]
@@ -90,6 +97,13 @@ function forward_dual(stages; debug=0, normalize=false, solvertol=1e-5)
   end
 end
 
+""" Add a primal cut 
+
+stage is the current stage problem, at which the cut is added
+next is the next stage problem whose dual variable is obtained to define the cut 
+
+the state at which the cut is computed is stored in next.ext
+"""
 function add_cut!(stage, next)
   ref = JuMP.FixRef.(next.ext[:vars][2])
   x0 = JuMP.value.(ref)
@@ -108,6 +122,8 @@ function add_cut!(stage, next)
   push!(stage.ext[:cuts], [cst, multipliers, x0])
 end
 
+
+""" Debug function """
 function compute_cut(stage, next, next_state::Vector{Float64})
   set_initial_state!(next, next_state)
   opt_recover(next, "primal_cut", "Primal, risk-cut: Failed to solve for initial state $(next_state)")
@@ -118,6 +134,13 @@ function compute_cut(stage, next, next_state::Vector{Float64})
   return [cst, multipliers, next_state, cst - multipliers'*next_state]
 end
 
+""" Add a dual cut 
+
+stage is the current stage problem, at which the cut is added
+next is the next stage problem whose dual variable is obtained to define the cut 
+
+the state at which the cut is computed is stored in next.ext
+"""
 function add_cut_dual!(stage, next)
   ref_π = JuMP.FixRef.(next.ext[:vars][3])
   ref_γ = JuMP.FixRef.(next.ext[:vars][4])
@@ -140,19 +163,31 @@ function add_cut_dual!(stage, next)
   push!(stage.ext[:cuts], [cst, mul_π, mul_γ, π0, γ0])
 end
 
+""" Perform a primal backward pass """
 function backward(stages)
   for i in 1:(length(stages)-1)
     add_cut!(stages[i], stages[i+1])
   end
 end
 
+""" Perform a dual backward pass """
 function backward_dual(stages)
   for i in 1:(length(stages)-1)
     add_cut_dual!(stages[i], stages[i+1])
   end
 end
 
-function primalsolve(M, nstages, risk, solver, state0, niters;
+""" 
+Solve the problem through primal SDDP
+
+M is a MSLBO representing the problem
+nstages is the horizon of the problem
+risk is a function building the risk measure
+state0 is the initial state
+niters is the number of iterations ran before stopping
+
+"""
+function primalsolve(M::MSLBO, nstages, risk, solver, state0, niters;
                      verbose=false, ub=false)
   pb = mk_primal_decomp(M, nstages, risk)
   for m in pb
@@ -185,6 +220,11 @@ function primalsolve(M, nstages, risk, solver, state0, niters;
   end
 end
 
+
+""" Compute a primal upper bound "à la" Philpott et. al.
+that is using backward propagation through given trajectories
+at given niters iteration
+"""
 function primalub(M, nstages, risk,solver, trajs,niters::Int;verbose=false)
   println("******************************************")
   println(" PRIMAL Upper Bounds at $niters iteration")
@@ -203,6 +243,9 @@ function primalub(M, nstages, risk,solver, trajs,niters::Int;verbose=false)
   return Ubs
 end
 
+""" Compute a primal upper bound "à la" Philpott et. al.
+that is using backward propagation through given trajectories
+at iteration defined by iterator niters"""
 function primalub(M, nstages, risk,solver,trajs,niters;verbose = false)
   if verbose
     println("********")
@@ -223,8 +266,17 @@ function primalub(M, nstages, risk,solver,trajs,niters;verbose = false)
 end
 
 
+""" 
+Solve the problem through dual SDDP
 
-function dualsolve(M, nstages, risk, solver, state0, niters; verbose=false)
+M is a MSLBO
+nstages is the horizon of the problem
+risk is a function building the risk measure
+state0 is the initial state
+niters is the number of iterations ran before stopping
+
+"""
+function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters; verbose=false)
   pb = mk_dual_decomp(M, nstages, risk)
   for m in pb
     JuMP.set_optimizer(m, solver)

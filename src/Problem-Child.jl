@@ -8,16 +8,29 @@
 # where \rho is the Risk Measure
 #
 
+""" Primal cuts"""
 struct Cut
     intercept :: Float64
     slope :: Vector{Float64}
 end
 
+""" Inner approximation vertices"""
 struct Vertex
     value :: Float64
     point :: Vector{Float64}
 end
 
+""" Object representing both inner and outer problem 
+
+outer is a collection of JuMP model representing the outer problem for each branch
+inner is a collection of JuMP model representing the inner problem for each branch
+prob is the reference probability 
+n_branches is the number of branch per stage 
+risk is a function building a JuMP model 
+cuts is a collection of primal cuts 
+inner_vertices is a collection of vertices inside the epigraph
+ub_model is a JuMP model to compute the upper bound 
+"""
 struct IO_stage
     outer :: Vector{Model}
     inner :: Vector{Model}
@@ -37,6 +50,7 @@ function show(io::IO, ::MIME"text/plain", s::DualSDDP.IO_stage)
   print(  io, "  and state dimension $(length(s.outer[1][:x]))")
 end
 
+""" Initialize the IO_stages from the model M with risk function risk"""
 function mk_primal_io(M::MSLBO, T::Int, risk)
     stages = IO_stage[]
     for t in 1:T
@@ -59,6 +73,7 @@ function mk_primal_io(M::MSLBO, T::Int, risk)
     return stages
 end
 
+""" Construct the initial primal outer problem"""
 function mk_primal_outer(M::MSLBO,t::Int, T::Int)
     prob = M.prob(t)
     n = length(prob)
@@ -93,6 +108,7 @@ function mk_primal_outer(M::MSLBO,t::Int, T::Int)
     return scen_probs
 end
 
+""" Construct the initial upper bound problem"""
 function mk_primal_ub_model(M::MSLBO, t::Int, T::Int)
     nx = size(M.A(t,1),2)
     m = Model()
@@ -113,6 +129,7 @@ function mk_primal_ub_model(M::MSLBO, t::Int, T::Int)
     return m
 end
 
+""" Construct the initial inner problem"""
 function mk_primal_inner(M::MSLBO, t::Int, T::Int)
     prob = M.prob(t)
     n = length(prob)
@@ -156,6 +173,9 @@ function mk_primal_inner(M::MSLBO, t::Int, T::Int)
     return scen_probs
 end
 
+""" Compute, for a given state value, the gap between the inner and outer approximation
+required by problem-child selection procedure
+"""
 function gap(stage::IO_stage,state)
     lb = -Inf
     for c in stage.cuts
@@ -171,6 +191,8 @@ function gap(stage::IO_stage,state)
     return ub - lb
 end
 
+""" Return a vector of all possible next next states computed from curr_states
+using the outer approximation """
 function compute_next_states(stage::IO_stage,curr_state)
     next_states=Vector{Float64}[]
 
@@ -186,6 +208,12 @@ function compute_next_states(stage::IO_stage,curr_state)
     return next_states
 end
 
+""" Compute the problem-child next state 
+
+Given a curr state and current inner and outer cost-to-go update_approximations
+compute the next states according to all branches using outer cost-to-go 
+return the next state with the largest difference between current upper and lower approx
+"""
 function choose_problem_child(stage::IO_stage,curr_state)
     next_states = compute_next_states(stage,curr_state)
     worst_gap = -1
@@ -200,6 +228,10 @@ function choose_problem_child(stage::IO_stage,curr_state)
     return next_state
 end
 
+"""
+Make a forward phase according to the problem child strategy
+return trajectory 
+"""
 function forward(stages::Vector{IO_stage}, state0; debug=0)
     curr_state = state0
     traj = [curr_state]
@@ -213,6 +245,10 @@ function forward(stages::Vector{IO_stage}, state0; debug=0)
     return traj
 end
 
+"""
+Update inner and outer approximation along a given trajectories 
+(e.g. computed by forward) 
+"""
 function update_approximations(stages::Vector{IO_stage},traj,solver)
     T = length(stages)
     for t in 1:T-1
@@ -224,6 +260,7 @@ function update_approximations(stages::Vector{IO_stage},traj,solver)
     end
 end
 
+""" Compute a new inner vertex"""
 function compute_vertex(stage::IO_stage, next_stage::IO_stage,next_state, solver)
     values = []
     for next in next_stage.inner
@@ -246,6 +283,7 @@ function compute_vertex(stage::IO_stage, next_stage::IO_stage,next_state, solver
     return v
 end
 
+""" Add the same vertices in every inner model (one per branch) """
 function add_vertex!(stage::IO_stage, vertex::Vertex)
     for m in stage.inner
         add_vertex!(m,vertex)
@@ -253,6 +291,7 @@ function add_vertex!(stage::IO_stage, vertex::Vertex)
     add_vertex!(stage.ub_model,vertex)
 end
 
+""" Add a vertex to an inner model"""
 function add_vertex!(m::JuMP.Model, vertex::Vertex)
     σk = @variable(m)
     set_lower_bound.(σk,0)
@@ -268,6 +307,7 @@ function add_vertex!(m::JuMP.Model, vertex::Vertex)
     set_normalized_coefficient(m[:z_lb], σk, vk)
 end
 
+""" Compute a primal cut at next_state"""
 function compute_cut(stage::IO_stage, next_stage::IO_stage,next_state, solver)
     slopes = []
     values = []
@@ -309,7 +349,15 @@ function add_cut!(stage::IO_stage, cut::Cut)
     end
 end
 
+"""Solve the problem M using the problem-child approach
 
+M is an MSLBO TODO : check
+nstages is the number of stages considered
+risk is a function building the risk function
+solver is a linear solver 
+state0 is the initaial state 
+niters is the number of iterations ran before stopping
+"""
 function problem_child_solve(M, nstages, risk, solver, state0, niters;
                      verbose=false)
     pb = mk_primal_io(M, nstages, risk)
