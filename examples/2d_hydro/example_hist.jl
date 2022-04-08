@@ -26,22 +26,9 @@ import Gurobi
 env = Gurobi.Env()
 solver = JuMP.optimizer_with_attributes(() -> Gurobi.Optimizer(env), "OutputFlag" => 0)
 
-#####################
-# Solution algorithms
+M = Hydro_Hist.M
+state0 = inivol
 
-# Pure primal
-seed!(2)
-primal_pb, primal_trajs, primal_lbs = primalsolve(Hydro_Hist.M, nstages, risk, solver, inivol, niters; verbose=true)
-
-# Pure dual
-seed!(3)
-dual_pb, dual_ubs = dualsolve(Hydro_Hist.M, nstages, risk_dual, solver, inivol, niters; verbose=true)
-
-# Recursive upper bounds over primal trajectories
-rec_ubs = primalub(Hydro_Hist.M, nstages, risk, solver, primal_trajs, ub_step:ub_step:niters; verbose=true)
-
-# Primal with outer and inner bounds
-seed!(1)
-io_pb, io_lbs, io_ubs = problem_child_solve(Hydro_Hist.M, nstages, risk, solver, inivol, niters; verbose=true)
+include("../ex_calc_problems.jl")
 
 include("../ex_plot_save.jl")

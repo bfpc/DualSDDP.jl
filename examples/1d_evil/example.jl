@@ -20,20 +20,9 @@ risk_dual = mk_copersp_avar(alpha)
 import GLPK
 solver = GLPK.Optimizer
 
-# Solution algorithms
-# Pure primal
-seed!(2)
-primal_pb, primal_trajs, primal_lbs = primalsolve(Evil1d.M, nstages, risk, solver, [inivol], niters; verbose=true)
+M = Evil1d.M
+state0 = [inivol]
 
-# Pure dual
-seed!(1)
-dual_pb, dual_ubs = dualsolve(Evil1d.M, nstages, risk_dual, solver, [inivol], niters; verbose=true)
-
-# Recursive upper bounds over primal trajectories
-rec_ubs = primalub(Evil1d.M, nstages, risk, solver, primal_trajs, ub_step:ub_step:niters; verbose=true)
-
-# Primal with outer and inner bounds
-seed!(1)
-io_pb, io_lbs, io_ubs = problem_child_solve(Evil1d.M, nstages, risk, solver, [inivol], niters; verbose=true)
+include("../ex_calc_problems.jl")
 
 include("../ex_plot_save.jl")
