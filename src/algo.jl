@@ -198,13 +198,16 @@ function primalsolve(M::MSLBO, nstages, risk, solver, state0, niters;
   println(" PRIMAL ")
   println("********")
   trajs = []
+  times = Float64[]
   lbs = Float64[]
   for i = 1:niters
-    push!(trajs, forward(pb, state0; return_traj=true))
+    dt = @elapsed traj = forward(pb, state0; return_traj=true)
+    push!(trajs, traj)
     lb = JuMP.objective_value(pb[1])
     push!(lbs, lb)
     verbose && println("Iteration $i: LB = ", lb)
-    backward(pb)
+    dt += @elapsed backward(pb)
+    push!(times, dt)
   end
   if verbose
     println()
@@ -212,7 +215,7 @@ function primalsolve(M::MSLBO, nstages, risk, solver, state0, niters;
     println("Lower bound: ", lbs[end])
   end
 
-  return pb, trajs, lbs
+  return pb, trajs, lbs, times
 end
 
 
@@ -248,16 +251,20 @@ function primalub(M, nstages, risk,solver,trajs,niters;verbose = false)
     println("********")
   end
   ub = Tuple{Int,Float64}[]
+  times = Float64[]
   for n in niters
+    dt = @elapsed begin
     stages = mk_primal_decomp(M, nstages, risk)
     for m in stages
       JuMP.set_optimizer(m, solver)
     end
     Ubs = convex_ub(stages, trajs[1:n])
+    end
     verbose && println("Primal upperbound at iteration $n: $(Ubs[1,1])")
     push!(ub,(n,Ubs[1,1]))
+    push!(times, dt)
   end
-  return ub
+  return ub, times
 end
 
 
@@ -280,12 +287,14 @@ function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters; verbose=fals
   println("********")
   init_dual(pb, state0)
   ubs = Float64[]
+  times = Float64[]
   for i = 1:niters
-    forward_dual(pb; normalize=true)
+    dt = @elapsed forward_dual(pb; normalize=true)
     ub = -JuMP.objective_value(pb[1])
     push!(ubs, ub)
     verbose && println("Iteration $i: UB = ", ub)
-    backward_dual(pb)
+    dt += @elapsed backward_dual(pb)
+    push!(times, dt)
   end
   if verbose
     println()
@@ -293,5 +302,5 @@ function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters; verbose=fals
     println("Upper bound: ", ubs[end])
   end
 
-  return pb, ubs
+  return pb, ubs, times
 end

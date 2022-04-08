@@ -375,27 +375,30 @@ function problem_child_solve(M, nstages, risk, solver, state0, niters;
     println(" PROBLEM CHILD ")
     println("********************")
     trajs = []
+    times = Float64[]
     lbs = Float64[]
     p_ubs = Float64[]
     for i = 1:niters
-        push!(trajs, forward(pb, state0))
+        dt = @elapsed traj = forward(pb, state0)
+        push!(trajs, traj)
          #TODO missing first stage risk measure
         lb = JuMP.objective_value(pb[1].outer[1])
         push!(lbs, lb)
         verbose && print("Iteration $i: LB = ", lb)
-        update_approximations(pb,trajs[end],solver)
+        dt += @elapsed update_approximations(pb,trajs[end],solver)
 
         m = pb[1].inner[1]
         set_initial_state!(m,state0)
-        opt_recover(m, "problem_child_1_st", "Primal, Upperbound: Failed to solve initial problem")
+        dt += @elapsed opt_recover(m, "problem_child_1_st", "Primal, Upperbound: Failed to solve initial problem")
         p_ub = JuMP.objective_value(m)
         verbose && println(" P-UB = ", p_ub)
         push!(p_ubs,p_ub)
+        push!(times,dt)
     end
     if verbose
         println()
     else
         println("Lower bound: ", lbs[end]," Upper bounds: ", p_ubs[end])
     end
-    return pb, lbs, p_ubs
+    return pb, lbs, p_ubs, times
 end
