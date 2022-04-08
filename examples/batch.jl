@@ -95,7 +95,7 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64})
 
     # Primal with interior bounds
     seed!(2)
-    primal_pb, primal_trajs, primal_lbs = primalsolve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true, ub=false)
+    primal_pb, primal_trajs, primal_lbs = primalsolve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true)
 
     # Compute ub from primal trajectories "à la Philpott et al."
     ub_step = params["ub_step"]

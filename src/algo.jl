@@ -188,7 +188,7 @@ niters is the number of iterations ran before stopping
 
 """
 function primalsolve(M::MSLBO, nstages, risk, solver, state0, niters;
-                     verbose=false, ub=false)
+                     verbose=false)
   pb = mk_primal_decomp(M, nstages, risk)
   for m in pb
     JuMP.set_optimizer(m, solver)
@@ -212,12 +212,7 @@ function primalsolve(M::MSLBO, nstages, risk, solver, state0, niters;
     println("Lower bound: ", lbs[end])
   end
 
-  if ub
-    Ubs = primalub(M, nstages, risk,solver,trajs,niters;verbose=verbose)
-    return pb, trajs, lbs, Ubs
-  else
-    return pb, trajs, lbs
-  end
+  return pb, trajs, lbs
 end
 
 
