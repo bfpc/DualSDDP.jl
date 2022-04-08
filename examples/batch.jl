@@ -91,31 +91,35 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64})
     # Solution algorithms
     # Pure dual
     seed!(3)
-    dual_pb, dual_ubs = dualsolve(M, nstages, risk_dual, solver, state0, params["dual_iters"]; verbose=true)
+    dual_pb, dual_ubs, dual_times = dualsolve(M, nstages, risk_dual, solver, state0, params["dual_iters"]; verbose=true)
 
     # Primal with interior bounds
     seed!(2)
-    primal_pb, primal_trajs, primal_lbs = primalsolve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true)
+    primal_pb, primal_trajs, primal_lbs, primal_times = primalsolve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true)
 
     # Compute ub from primal trajectories "à la Philpott et al."
     ub_step = params["ub_step"]
     iters_ub = ub_step:ub_step:params["primal_iters"]
-    ubs_p = primalub(M, nstages, risk, solver, primal_trajs, iters_ub; verbose=true)
+    ubs_p, ubs_times = primalub(M, nstages, risk, solver, primal_trajs, iters_ub; verbose=true)
 
     # Primal with inner and outer bounds
     seed!(4)
-    io_pb, io_lbs, io_ubs = problem_child_solve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true)
+    io_pb, io_lbs, io_ubs, io_times = problem_child_solve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true)
 
 
     # Saving info
     data = Dict()
     #   Bounds
     data["primal lb"] = primal_lbs
+    data["primal t"]  = primal_times
     data["dual ub"]   = dual_ubs
+    data["dual t"]    = dual_times
     data["inner recursive iters"] = first.(ubs_p)
     data["inner recursive bound"] = last.(ubs_p)
+    data["inner recursive t"] = ubs_times
     data["io lb"] = io_lbs
     data["io ub"] = io_ubs
+    data["io t"]  = io_times
 
     save_vfs!(data, primal_pb, dual_pb)
 
