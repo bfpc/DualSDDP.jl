@@ -351,7 +351,7 @@ end
 
 """Solve the problem M using the problem-child approach
 
-M is an MSLBO TODO : check
+M is an MSLBO 
 nstages is the number of stages considered
 risk is a function building the risk function
 solver is a linear solver 
