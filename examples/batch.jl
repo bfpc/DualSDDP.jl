@@ -138,10 +138,24 @@ dir = cfg["experiment"]["dir"]
 lip_factor = cfg["parameters"]["Lip"]
 include(joinpath(dir, cfg["experiment"]["Model"]))
 
+ttime = 0
+
 for idx=1:N
     parse!(cfg, idx)
 
     # Remove references to specific "module" name?
-    experiment(cfg, Hydro_Hist.M, Hydro_Hist.inivol)
+    #print(cfg)
+    α = cfg["risk-aversion"]["alpha"]
+    β = cfg["risk-aversion"]["beta"]
+    L = cfg["parameters"]["Lip"]
+    exp = cfg["experiment"]["dir"]
+    println("##################################")
+    println("$idx/$N experience  $exp with α=$α, β=$β and Lip_factor=$L")
+    println("##################################")
+
+    global ttime += @elapsed experiment(cfg, Hydro_Hist.M, Hydro_Hist.inivol)
+    println()
+    println("Estimated time remaining: ", ttime*(N-idx)/idx )
+    println()
 end
 

@@ -358,8 +358,7 @@ solver is a linear solver
 state0 is the initaial state 
 niters is the number of iterations ran before stopping
 """
-function problem_child_solve(M, nstages, risk, solver, state0, niters;
-                     verbose=false)
+function problem_child_solve(M, nstages, risk, solver, state0, niters;verbose=false, nprint=10)
     pb = mk_primal_io(M, nstages, risk)
     for stage in pb
         for m in stage.inner
@@ -384,14 +383,18 @@ function problem_child_solve(M, nstages, risk, solver, state0, niters;
          #TODO missing first stage risk measure
         lb = JuMP.objective_value(pb[1].outer[1])
         push!(lbs, lb)
-        verbose && print("Iteration $i: LB = ", lb)
+        if verbose && (i % nprint == 0)
+            print("Iteration $i: LB = ", lb)
+        end
         dt += @elapsed update_approximations(pb,trajs[end],solver)
 
         m = pb[1].inner[1]
         set_initial_state!(m,state0)
         dt += @elapsed opt_recover(m, "problem_child_1_st", "Primal, Upperbound: Failed to solve initial problem")
         p_ub = JuMP.objective_value(m)
-        verbose && println(" P-UB = ", p_ub)
+        if verbose && (i % nprint == 0)
+            println(" P-UB = ", p_ub)
+        end
         push!(p_ubs,p_ub)
         push!(times,dt)
     end

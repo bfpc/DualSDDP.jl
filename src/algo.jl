@@ -188,7 +188,7 @@ niters is the number of iterations ran before stopping
 
 """
 function primalsolve(M::MSLBO, nstages, risk, solver, state0, niters;
-                     verbose=false)
+                     verbose=false, nprint=10)
   pb = mk_primal_decomp(M, nstages, risk)
   for m in pb
     JuMP.set_optimizer(m, solver)
@@ -205,7 +205,10 @@ function primalsolve(M::MSLBO, nstages, risk, solver, state0, niters;
     push!(trajs, traj)
     lb = JuMP.objective_value(pb[1])
     push!(lbs, lb)
-    verbose && println("Iteration $i: LB = ", lb)
+    
+    if verbose && (i % nprint == 0)
+      println("Iteration $i: LB = ", lb)
+    end
     dt += @elapsed backward(pb)
     push!(times, dt)
   end
@@ -260,7 +263,7 @@ function primalub(M, nstages, risk,solver,trajs,niters;verbose = false)
     end
     Ubs = convex_ub(stages, trajs[1:n])
     end
-    verbose && println("Primal upperbound at iteration $n: $(Ubs[1,1])")
+    verbose && println("Primal (Philpott) UB at iteration $n: $(Ubs[1,1])")
     push!(ub,(n,Ubs[1,1]))
     push!(times, dt)
   end
@@ -277,7 +280,7 @@ risk is a function building the risk measure
 state0 is the initial state
 niters is the number of iterations ran before stopping
 """
-function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters; verbose=false)
+function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters; verbose=false, nprint=10)
   pb = mk_dual_decomp(M, nstages, risk)
   for m in pb
     JuMP.set_optimizer(m, solver)
@@ -292,10 +295,12 @@ function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters; verbose=fals
     dt = @elapsed forward_dual(pb; normalize=true)
     ub = -JuMP.objective_value(pb[1])
     push!(ubs, ub)
-    verbose && println("Iteration $i: UB = ", ub)
-    dt += @elapsed backward_dual(pb)
-    push!(times, dt)
+    if verbose && (i % nprint == 0)
+      println("Iteration $i: D-UB = ", ub)
+    end
   end
+  dt += @elapsed backward_dual(pb)
+  push!(times, dt)
   if verbose
     println()
   else
