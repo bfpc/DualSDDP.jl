@@ -75,11 +75,18 @@ function save_vfs!(data, primal_pb, dual_pb)
     return
 end
 
-function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64})
+function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
+    primal = true, dual = true, philpott_ub = true, pb_child = true)
     # Risk Aversion
     ra     = cfg["risk-aversion"]
     alpha  = ra["alpha"]
     beta   = ra["beta"]
+    epsilon = cfg["parameters"]["epsilon"]
+
+    primal = cfg["parameters"]["primal"]
+    dual = cfg["parameters"]["dual"]
+    philpott_ub = cfg["parameters"]["philpott_ub"]
+    pb_child = cfg["parameters"]["pb_child"]
 
     risk      = mk_primal_avar(alpha; beta=beta)
     risk_dual = mk_copersp_avar(alpha; beta=beta)
@@ -90,21 +97,40 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64})
 
     # Solution algorithms
     # Pure dual
-    seed!(3)
-    dual_pb, dual_ubs, dual_times = dualsolve(M, nstages, risk_dual, solver, state0, params["dual_iters"]; verbose=true)
+    if dual
+      println(epsilon)
+      seed!(3)
+      dual_pb, dual_ubs, dual_times = dualsolve(M, nstages, risk_dual, solver, state0, params["dual_iters"]; verbose=true, epsilon = epsilon)
+    else
+      dual_pb, dual_ubs, dual_times = 0,0,0
+    end
 
     # Primal with interior bounds
-    seed!(2)
-    primal_pb, primal_trajs, primal_lbs, primal_times = primalsolve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true)
 
-    # Compute ub from primal trajectories "à la Philpott et al."
-    ub_step = params["ub_step"]
-    iters_ub = ub_step:ub_step:params["primal_iters"]
-    ubs_p, ubs_times = primalub(M, nstages, risk, solver, primal_trajs, iters_ub; verbose=true)
+    if (primal || philpott_ub)
+      seed!(2)
+      primal_pb, primal_trajs, primal_lbs, primal_times = primalsolve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true)
+
+      if philpott_ub
+        # Compute ub from primal trajectories "à la Philpott et al."
+        ub_step = params["ub_step"]
+        iters_ub = ub_step:ub_step:params["primal_iters"]
+        ubs_p, ubs_times = primalub(M, nstages, risk, solver, primal_trajs, iters_ub; verbose=true)
+      else
+        ubs_p, ubs_times = 0,0
+      end
+    else
+      primal_pb, primal_trajs, primal_lbs, primal_times = 0,0,0,0
+      ubs_p, ubs_times = 0,0
+    end
 
     # Primal with inner and outer bounds
-    seed!(4)
-    io_pb, io_lbs, io_ubs, io_times = problem_child_solve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true)
+    if pb_child
+      seed!(4)
+      io_pb, io_lbs, io_ubs, io_times = problem_child_solve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true)
+    else
+      io_pb, io_lbs, io_ubs, io_times = 0,0,0,0
+    end
 
 
     # Saving info
@@ -149,8 +175,9 @@ for idx=1:N
     β = cfg["risk-aversion"]["beta"]
     L = cfg["parameters"]["Lip"]
     exp = cfg["experiment"]["dir"]
+    nstages = cfg["parameters"]["nstages"]
     println("##################################")
-    println("$idx/$N experience  $exp with α=$α, β=$β and Lip_factor=$L")
+    println("$idx/$N experience $exp with horizon $nstages for α=$α, β=$β and Lip_factor=$L")
     println("##################################")
 
     global ttime += @elapsed experiment(cfg, Hydro_Hist.M, Hydro_Hist.inivol)
