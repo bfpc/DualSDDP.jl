@@ -280,7 +280,7 @@ risk is a function building the risk measure
 state0 is the initial state
 niters is the number of iterations ran before stopping
 """
-function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters; verbose=false, nprint=10)
+function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters; verbose=false, nprint=10, epsilon = 1e-2)
   pb = mk_dual_decomp(M, nstages, risk)
   for m in pb
     JuMP.set_optimizer(m, solver)
@@ -292,15 +292,15 @@ function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters; verbose=fals
   ubs = Float64[]
   times = Float64[]
   for i = 1:niters
-    dt = @elapsed forward_dual(pb; normalize=true)
+    dt = @elapsed forward_dual(pb; normalize=true, epsilon = epsilon)
     ub = -JuMP.objective_value(pb[1])
     push!(ubs, ub)
     if verbose && (i % nprint == 0)
       println("Iteration $i: D-UB = ", ub)
     end
+    dt += @elapsed backward_dual(pb)
+    push!(times, dt)
   end
-  dt += @elapsed backward_dual(pb)
-  push!(times, dt)
   if verbose
     println()
   else
