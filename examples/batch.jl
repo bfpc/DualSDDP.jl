@@ -13,10 +13,9 @@ solver = JuMP.optimizer_with_attributes(() -> Gurobi.Optimizer(env), "OutputFlag
 # import GLPK
 # solver = GLPK.Optimizer
 
-function save_vfs!(data, primal_pb, dual_pb)
+function save_primal_vfs!(data, primal_pb)
     nstages = length(primal_pb)
 
-    # Primal
     primal_VFs = [pvf_info(stage) for stage in primal_pb]
     primal_iters = length(primal_VFs[1])
 
@@ -40,7 +39,12 @@ function save_vfs!(data, primal_pb, dual_pb)
     end
     data["primal VF multipliers"] = multipliers
 
-    # Dual
+    return
+end
+
+function save_dual_vfs!(data, dual_pb)
+    nstages = length(dual_pb)
+
     dual_VFs = [dvf_info(stage) for stage in dual_pb]
     dual_iters = length(dual_VFs[1])
 
@@ -105,7 +109,7 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
       seed!(3)
       dual_pb, dual_ubs, dual_times = dualsolve(M, nstages, risk_dual, solver, state0, params["dual_iters"]; verbose=true, epsilon = epsilon)
     else
-      dual_pb, dual_ubs, dual_times = 0,0,0
+      dual_pb, dual_ubs, dual_times = [],[],[]
     end
 
     # Primal with interior bounds
@@ -120,11 +124,11 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
         iters_ub = ub_step:ub_step:params["primal_iters"]
         ubs_p, ubs_times = primalub(M, nstages, risk, solver, primal_trajs, iters_ub; verbose=true)
       else
-        ubs_p, ubs_times = 0,0
+        ubs_p, ubs_times = [],[]
       end
     else
-      primal_pb, primal_trajs, primal_lbs, primal_times = 0,0,0,0
-      ubs_p, ubs_times = 0,0
+      primal_pb, primal_trajs, primal_lbs, primal_times = [],[],[],[]
+      ubs_p, ubs_times = [],[]
     end
 
     # Primal with inner and outer bounds
@@ -132,7 +136,7 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
       seed!(4)
       io_pb, io_lbs, io_ubs, io_times = problem_child_solve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true)
     else
-      io_pb, io_lbs, io_ubs, io_times = 0,0,0,0
+      io_pb, io_lbs, io_ubs, io_times = [],[],[],[]
     end
 
 
@@ -150,7 +154,10 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
     data["io ub"] = io_ubs
     data["io t"]  = io_times
 
-    save_vfs!(data, primal_pb, dual_pb)
+    primal && save_primal_vfs!(data, primal_pb)
+    dual   && save_dual_vfs!(data, dual_pb)
+    # TODO
+    # pb_child && save_io_vfs!(data, io_pb)
 
     save(cfg, data)
 end
