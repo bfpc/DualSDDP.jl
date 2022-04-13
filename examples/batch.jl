@@ -81,23 +81,27 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
     ra     = cfg["risk-aversion"]
     alpha  = ra["alpha"]
     beta   = ra["beta"]
-    epsilon = cfg["parameters"]["epsilon"]
-
-    primal = cfg["parameters"]["primal"]
-    dual = cfg["parameters"]["dual"]
-    philpott_ub = cfg["parameters"]["philpott_ub"]
-    pb_child = cfg["parameters"]["pb_child"]
 
     risk      = mk_primal_avar(alpha; beta=beta)
     risk_dual = mk_copersp_avar(alpha; beta=beta)
 
+    # Algorithms to run
+    algo = cfg["algorithms"]
+    primal      = algo["primal"]
+    dual        = algo["dual"]
+    philpott_ub = algo["philpott_ub"]
+    pb_child    = algo["pb_child"]
+
     # Other parameters
     params  = cfg["parameters"]
     nstages = params["nstages"]
+    # Regularization for probabilities in dual forward
+    epsilon = params["epsilon"]
 
     # Solution algorithms
     # Pure dual
     if dual
+      println("Forward regularization: $(epsilon)")
       seed!(3)
       dual_pb, dual_ubs, dual_times = dualsolve(M, nstages, risk_dual, solver, state0, params["dual_iters"]; verbose=true, epsilon = epsilon)
     else
@@ -172,11 +176,9 @@ for idx=8:N
     #print(cfg)
     α = cfg["risk-aversion"]["alpha"]
     β = cfg["risk-aversion"]["beta"]
-    L = cfg["parameters"]["Lip"]
-    exp = cfg["experiment"]["dir"]
     nstages = cfg["parameters"]["nstages"]
     println("##################################")
-    println("$idx/$N experience $exp with horizon $nstages for α=$α, β=$β and Lip_factor=$L")
+    println("$idx/$N experience $dir with horizon $nstages for α=$α, β=$β and Lip_factor=$lip_factor")
     println("##################################")
 
     global ttime += @elapsed experiment(cfg, Hydro_Hist.M, Hydro_Hist.inivol)

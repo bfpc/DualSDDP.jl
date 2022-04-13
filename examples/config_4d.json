@@ -15,6 +15,12 @@
         "ub_step":50,
         "start month": 1,
         "epsilon": 1e-2,
+        "ub_step":25,
+        "epsilon": 1e-2,
+        "start month": 1
+    },
+
+    "algorithms": {
         "dual": true,
         "primal": true,
         "philpott_ub": true,

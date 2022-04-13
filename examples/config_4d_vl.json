@@ -12,7 +12,16 @@
         "nstages": 24,
         "primal_iters": 1000,
         "dual_iters": 1000,
+        "ub_step":25,
+        "epsilon": 1e-2,
         "start month": 1
+    },
+
+    "algorithms": {
+        "dual": true,
+        "primal": true,
+        "philpott_ub": true,
+        "pb_child": true
     },
 
     "risk-aversion": {

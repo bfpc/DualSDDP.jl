@@ -13,8 +13,11 @@
         "primal_iters": 500,
         "ub_step":50,
         "dual_iters": 500,
-        "start month": 1,
         "epsilon": 1e-2,
+        "start month": 1
+    },
+
+    "algorithms": {
         "dual": true,
         "primal": true,
         "philpott_ub": true,
