@@ -267,6 +267,7 @@ function primalub(M, nstages, risk,solver,trajs,niters;verbose = false)
     push!(ub,(n,Ubs[1,1]))
     push!(times, dt)
   end
+  verbose && println()
   return ub, times
 end
 
