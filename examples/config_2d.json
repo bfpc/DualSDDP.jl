@@ -9,10 +9,10 @@
     "parameters": {
         "Lip": 10,
         "nscen": 0,
-        "nstages": 6,
-        "primal_iters": 300,
+        "nstages": 12,
+        "primal_iters": 500,
         "ub_step":25,
-        "dual_iters": 1000,
+        "dual_iters": 500,
         "start month": 1,
         "epsilon": 1e-2,
         "dual": true,

@@ -19,14 +19,15 @@ bounds_dict = Dict()
 alphas = Set()
 betas = Set()
 
-for idx=1:N
+for idx=1:7#N
+    println(idx)
     parse!(cfg, idx)
     data = load(cfg)
 
     alpha = cfg["risk-aversion"]["alpha"]
     beta  = cfg["risk-aversion"]["beta"]
 
-    bounds_dict[(alpha,beta)] = (data["lb"], data["ub"], data["inner"])
+    bounds_dict[(alpha,beta)] = (data["primal lb"], data["dual ub"], data["inner recursive bound"],data["inner recursive iters"],data["io lb"],data["io ub"])
     push!(alphas, alpha)
     push!(betas, beta)
 end
@@ -43,11 +44,16 @@ for i in 1:nalphas
   a = alphas[i]
   j = 0
   for b in betas
-    lb, ub, inner = bounds_dict[(a,b)]
-    gap = ub./lb .- 1
-    axs[i].semilogy(gap, label=string(b), color="C$j")
-    axs[i].semilogy(first.(inner), last.(inner)./lb[first.(inner)] .- 1, linestyle="--", color="C$j")
-    j+=1
+    if haskey(bounds_dict,(a,b))  
+      lb, ub, inner, inner_it, io_lb, io_ub = bounds_dict[(a,b)]
+      gap = ub./lb .- 1
+      # '-', '--', '-.', ':', 'None', ' ', '', 'solid', 'dashed', 'dashdot', 'dotted'
+      axs[i].semilogy(gap, label=string(b), color="C$j")
+      axs[i].semilogy(inner_it, inner./lb[inner_it] .- 1, linestyle="--", color="C$j")
+      axs[i].semilogy( io_ub./io_lb .- 1, linestyle="dashdot", color="C$j")
+      j+=1
+    end
+    
   end
   axs[i].legend(title="β")
   axs[i].set_title("α = $a")

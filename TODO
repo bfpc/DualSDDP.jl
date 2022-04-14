@@ -5,8 +5,26 @@ Number of scenarios
 
 Lipschitz Cst
 
+Numerical Experiments
+======
+Test 1d 
+* fine step alpha / beta x Lip : 1 / 10 / 100 / 1000 
+* horizon by default
+
+Test 2d 
+* [alpha, beta] -> 9
+* finir T = 12 (exemples 8-9 dans la boucle de param)
+* test Lipschitz 1 / 100
+* T = 6 / 24  ? 
+
+Test 4d
+* A voir 
+
+
 Plots
-  Compatible with new saving system
+======
+
+* Plot bounds (not gap)  2 per case 25-100, 100-500 (to be ajusted) 
 
 Documentation
 =============
@@ -14,5 +32,5 @@ Code
 
 Detailed Algorithm
 
-Exemples (2 from paper + "evil" child)
-  Complete results (tables, ...)
+Exemples (2 from paper + "evil" child -> not required)
+Complete results (tables, ...)
