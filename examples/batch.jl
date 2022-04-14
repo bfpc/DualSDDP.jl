@@ -172,6 +172,7 @@ parse!(cfg, 1)
 
 dir = cfg["experiment"]["dir"]
 lip_factor = cfg["parameters"]["Lip"]
+nscen = cfg["parameters"]["nscen"]
 include(joinpath(dir, cfg["experiment"]["Model"]))
 
 ttime = 0

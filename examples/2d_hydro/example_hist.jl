@@ -9,6 +9,7 @@ using DualSDDP
 # Parameters & Data
 
 lip_factor = 1
+nscen = 0
 
 include("hydro_hist.jl")
 alpha = 0.4
