@@ -19,7 +19,7 @@ bounds_dict = Dict()
 alphas = Set()
 betas = Set()
 
-for idx=1:7#N
+for idx=1:N
     println(idx)
     parse!(cfg, idx)
     data = load(cfg)

@@ -98,7 +98,6 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
     # Solution algorithms
     # Pure dual
     if dual
-      println(epsilon)
       seed!(3)
       dual_pb, dual_ubs, dual_times = dualsolve(M, nstages, risk_dual, solver, state0, params["dual_iters"]; verbose=true, epsilon = epsilon)
     else
