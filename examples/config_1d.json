@@ -1,0 +1,32 @@
+{
+    "save_path": "1d_cases/Lip1-4stages-10br-alpha-beta",
+
+    "experiment": {
+        "dir": "1d_toy",
+        "Model": "hydro.jl"
+    },
+
+    "parameters": {
+        "Lip": 1,
+        "nscen": 10,
+        "nstages": 4,
+        "primal_iters": 50,
+        "ub_step":10,
+        "dual_iters": 50,
+        "epsilon": 1e-2,
+        "start month": 1
+    },
+
+    "algorithms": {
+        "dual": true,
+        "primal": true,
+        "philpott_ub": true,
+        "pb_child": true
+    },
+
+    "risk-aversion": {
+        "alpha": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+        "beta": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    }
+
+}
