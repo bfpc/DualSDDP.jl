@@ -1,5 +1,10 @@
 module Hydro1d
 
+include("hydro_scen.jl")
+
+# inivol
+inivol = [83.222]
+
 using DualSDDP: MSLBO
 
 function A(t::Int, i::Int)
@@ -22,7 +27,7 @@ function d(t::Int, i::Int)
   if t == 1
     return [0, 75.0]
   else
-    return [Main.inflows[i], 75.0]
+    return [inflows[i], 75.0]
   end
 end
 

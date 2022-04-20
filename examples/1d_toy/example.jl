@@ -21,7 +21,7 @@ import GLPK
 solver = GLPK.Optimizer
 
 M = Hydro1d.M
-state0 = [inivol]
+state0 = Hydro1d.inivol
 
 include("../ex_calc_problems.jl")
 

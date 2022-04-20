@@ -173,11 +173,11 @@ parse!(cfg, 1)
 dir = cfg["experiment"]["dir"]
 lip_factor = cfg["parameters"]["Lip"]
 nscen = cfg["parameters"]["nscen"]
-include(joinpath(dir, cfg["experiment"]["Model"]))
+MyModule = include(joinpath(dir, cfg["experiment"]["Model"]))
 
 ttime = 0
 
-for idx=8:N
+for idx=1:N
     parse!(cfg, idx)
 
     # Remove references to specific "module" name?
@@ -189,7 +189,7 @@ for idx=8:N
     println("$idx/$N experience $dir with horizon $nstages for α=$α, β=$β and Lip_factor=$lip_factor")
     println("##################################")
 
-    global ttime += @elapsed experiment(cfg, Hydro_Hist.M, Hydro_Hist.inivol)
+    global ttime += @elapsed experiment(cfg, MyModule.M, MyModule.inivol)
     println()
     println("Estimated time remaining: ", ttime*(N-idx)/idx )
     println()
