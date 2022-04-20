@@ -165,7 +165,7 @@ include(joinpath(dir, cfg["experiment"]["Model"]))
 
 ttime = 0
 
-for idx=1:N
+for idx=8:N
     parse!(cfg, idx)
 
     # Remove references to specific "module" name?
@@ -183,5 +183,6 @@ for idx=1:N
     println()
     println("Estimated time remaining: ", ttime*(N-idx)/idx )
     println()
+    GC.gc() #freeing memory before next run
 end
 

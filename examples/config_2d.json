@@ -1,5 +1,5 @@
 {
-    "save_path": "2d_cases/Lip1-12stages-82br-alpha-beta",
+    "save_path": "2d_cases/Lip1-24stages-82br-alpha-beta",
 
     "experiment": {
         "dir": "2d_hydro",
@@ -9,9 +9,9 @@
     "parameters": {
         "Lip": 1,
         "nscen": 0,
-        "nstages": 12,
+        "nstages": 24,
         "primal_iters": 500,
-        "ub_step":25,
+        "ub_step":50,
         "dual_iters": 500,
         "start month": 1,
         "epsilon": 1e-2,

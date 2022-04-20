@@ -7,18 +7,23 @@
     },
 
     "parameters": {
-        "Lip": 100,
+        "Lip": 10,
         "nscen": 0,
         "nstages": 12,
         "primal_iters": 300,
         "dual_iters": 300,
-        "ub_step":25,
-        "start month": 1
+        "ub_step":50,
+        "start month": 1,
+        "epsilon": 1e-2,
+        "dual": true,
+        "primal": true,
+        "philpott_ub": true,
+        "pb_child": true
     },
 
     "risk-aversion": {
-        "alpha": [0.1, 0.3, 0.6],
-        "beta": [0.0, 0.2, 0.5, 0.8, 1.0]
+        "alpha": [0.1],
+        "beta": [0.5]
     }
 
 }

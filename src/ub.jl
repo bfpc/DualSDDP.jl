@@ -30,6 +30,10 @@ function bellman_convex_ub(stage,xs, xs_next,zs)
   @constraint(stage, regabs .>=  reg)
   @constraint(stage, regabs .>= -reg)
   for j = 1:n_scen
+    #TODO replace sum by toto = AffExpr(0.0)
+    # for
+    # add_to_expression!(toto,coef,variable)
+    
     @constraint(stage, z[j] >= sum([s[k,j]*zs[k] for k in 1:n_traj]) + L*sum(regabs[:,j]))
     @constraint(stage, x[:,j] .== reg[:,j] + sum([s[k,j]*xs_next[k] for k in 1:n_traj]))
     @constraint(stage, sum([s[k,j] for k in 1:n_traj]) == 1)
