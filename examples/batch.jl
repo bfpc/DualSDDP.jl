@@ -105,7 +105,7 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
     # Solution algorithms
     # Pure dual
     if dual
-      println("Forward regularization: $(epsilon)")
+      #println("Forward regularization: $(epsilon)")
       seed!(3)
       dual_pb, dual_ubs, dual_times = dualsolve(M, nstages, risk_dual, solver, state0, params["dual_iters"]; verbose=true, epsilon = epsilon)
     else
@@ -185,8 +185,9 @@ for idx=1:N
     α = cfg["risk-aversion"]["alpha"]
     β = cfg["risk-aversion"]["beta"]
     nstages = cfg["parameters"]["nstages"]
+    ε = cfg["parameters"]["epsilon"]
     println("##################################")
-    println("$idx/$N experience $dir with horizon $nstages for α=$α, β=$β and Lip_factor=$lip_factor")
+    println("$idx/$N experience $dir with horizon $nstages for α=$α, β=$β, Lip_factor=$lip_factor and ε=$ε")
     println("##################################")
 
     global ttime += @elapsed experiment(cfg, MyModule.M, MyModule.inivol)
