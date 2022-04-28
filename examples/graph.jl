@@ -26,7 +26,7 @@ for idx=1:N
 
     alpha = cfg["risk-aversion"]["alpha"]
     beta  = cfg["risk-aversion"]["beta"]
-
+    
     bounds_dict[(alpha,beta)] = (data["primal lb"], data["dual ub"], data["inner recursive bound"],data["inner recursive iters"],data["io lb"],data["io ub"])
     push!(alphas, alpha)
     push!(betas, beta)
