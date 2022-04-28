@@ -175,6 +175,13 @@ lip_factor = cfg["parameters"]["Lip"]
 nscen = cfg["parameters"]["nscen"]
 MyModule = include(joinpath(dir, cfg["experiment"]["Model"]))
 
+# If all went well, we save the current config file to the output directory
+outdir = joinpath("data", "output", cfg["save_path"])
+mkpath(outdir)
+cfg_save = joinpath(outdir, cfg_name)
+cp(cfg_name, cfg_save)
+chmod(cfg_save, 0o440)
+
 ttime = 0
 
 for idx=1:N
