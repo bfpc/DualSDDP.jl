@@ -1,5 +1,5 @@
 {
-    "save_path": "2d_cases/Lip100-12stages-82br-alpha-beta",
+    "save_path": "2d_cases/Lip1-12stages-82br-alpha01-beta05-epsilon",
 
     "experiment": {
         "dir": "2d_hydro",
@@ -7,13 +7,13 @@
     },
 
     "parameters": {
-        "Lip": 100,
+        "Lip": 1,
         "nscen": 0,
         "nstages": 12,
-        "primal_iters": 500,
-        "ub_step":25,
+        "primal_iters": 10,
+        "ub_step":5,
         "dual_iters": 500,
-        "epsilon": 1e-2,
+        "epsilon": [1, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6],
         "start month": 1
     },
 
@@ -25,8 +25,8 @@
     },
 
     "risk-aversion": {
-        "alpha": [0.1, 0.3, 0.5],
-        "beta": [0.1, 0.5, 1.0]
+        "alpha":  [0.1],
+        "beta": [0.5]
     }
-    
+
 }

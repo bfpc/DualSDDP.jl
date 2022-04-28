@@ -1,5 +1,5 @@
 {
-    "save_path": "4d_cases/Lip100-12stages-82br-alpha-beta",
+    "save_path": "4d_cases/Lip10-12stages-82br-alpha-beta",
 
     "experiment": {
         "dir": "4d_hydro",
@@ -14,10 +14,7 @@
         "dual_iters": 300,
         "ub_step":50,
         "start month": 1,
-        "epsilon": 1e-2,
-        "ub_step":25,
-        "epsilon": 1e-2,
-        "start month": 1
+        "epsilon": 1e-2
     },
 
     "algorithms": {
@@ -28,8 +25,8 @@
     },
 
     "risk-aversion": {
-        "alpha": [0.1],
-        "beta": [0.5]
+        "alpha": [0.1, 0.3, 0.5],
+        "beta": [0.1, 0.5, 1.0]
     }
 
 }
