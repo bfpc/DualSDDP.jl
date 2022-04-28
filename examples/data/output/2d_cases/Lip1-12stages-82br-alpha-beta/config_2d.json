@@ -1,0 +1,32 @@
+{
+    "save_path": "2d_cases/Lip1-12stages-82br-alpha-beta",
+
+    "experiment": {
+        "dir": "2d_hydro",
+        "Model": "hydro_hist.jl"
+    },
+
+    "parameters": {
+        "Lip": 1,
+        "nscen": 0,
+        "nstages": 12,
+        "primal_iters": 500,
+        "ub_step":25,
+        "dual_iters": 500,
+        "epsilon": 1e-2,
+        "start month": 1
+    },
+
+    "algorithms": {
+        "dual": true,
+        "primal": true,
+        "philpott_ub":true,
+        "pb_child":true
+    },
+
+    "risk-aversion": {
+        "alpha": [0.1, 0.3, 0.5],
+        "beta": [0.1, 0.5, 1.0]
+    }
+    
+}
