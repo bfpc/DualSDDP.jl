@@ -1,5 +1,5 @@
 {
-    "save_path": "1d_cases/Lip1-4stages-10br-alpha-beta-nscenvariable",
+    "save_path": "1d_cases/Lip1-4stages-10br-alpha-beta",
 
     "experiment": {
         "dir": "1d_toy",
