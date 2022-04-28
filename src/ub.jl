@@ -33,7 +33,17 @@ function bellman_convex_ub(stage,xs, xs_next,zs)
     #TODO replace sum by toto = AffExpr(0.0)
     # for
     # add_to_expression!(toto,coef,variable)
-    
+
+    # cvx_cost = AffExpr(0.0)
+    # #cvx_point = AffExpr(zeros(state_dim))
+    # for k = 1:n_traj
+    #   add_to_expression!(cvx_cost,zs[k],s[k,j])
+    # end
+    # for i = 1:state_dim
+    #   add_to_expression!(cvx_cost,L,regabs[i,j])
+    # end
+    # @constraint(stage, z[j] >= cvx_cost)
+
     @constraint(stage, z[j] >= sum([s[k,j]*zs[k] for k in 1:n_traj]) + L*sum(regabs[:,j]))
     @constraint(stage, x[:,j] .== reg[:,j] + sum([s[k,j]*xs_next[k] for k in 1:n_traj]))
     @constraint(stage, sum([s[k,j] for k in 1:n_traj]) == 1)
