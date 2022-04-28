@@ -44,22 +44,23 @@ for i in 1:nalphas
   a = alphas[i]
   j = 0
   for b in betas
-    if haskey(bounds_dict,(a,b))  
+    if haskey(bounds_dict,(a,b))
       lb, ub, inner, inner_it, io_lb, io_ub = bounds_dict[(a,b)]
       gap = ub./lb .- 1
       # '-', '--', '-.', ':', 'None', ' ', '', 'solid', 'dashed', 'dashdot', 'dotted'
       axs[i].semilogy(gap, label=string(b), color="C$j")
       axs[i].semilogy(inner_it, inner./lb[inner_it] .- 1, linestyle="--", color="C$j")
-      axs[i].semilogy( io_ub./io_lb .- 1, linestyle="dashdot", color="C$j")
+      axs[i].semilogy(io_ub./io_lb .- 1, linestyle="dashdot", color="C$j")
       j+=1
     end
-    
   end
   axs[i].legend(title="β")
   axs[i].set_title("α = $a")
 end
 
-fig.suptitle(dir * " - Lipschitz factor: $lip_factor")
+fig.suptitle("Model: $dir - Lipschitz factor: $lip_factor
+             solid: primal-dual gap / dashed: primal-recursive gap / dashdot: outer-inner gap")
+fig.tight_layout()
 plt.savefig(joinpath("data", "output", cfg["save_path"], "Lip$(lip_factor).pdf"))
 
 
@@ -69,15 +70,21 @@ for i in 1:nbetas
   b = betas[i]
   j = 0
   for a in alphas
-    lb, ub, inner = bounds_dict[(a,b)]
-    gap = ub./lb .- 1
-    axs[i].semilogy(gap, label=string(a), color="C$j")
-    axs[i].semilogy(first.(inner), last.(inner)./lb[first.(inner)] .- 1, linestyle="--", color="C$j")
-    j+=1
+    if haskey(bounds_dict,(a,b))
+      lb, ub, inner, inner_it, io_lb, io_ub = bounds_dict[(a,b)]
+      gap = ub./lb .- 1
+      # '-', '--', '-.', ':', 'None', ' ', '', 'solid', 'dashed', 'dashdot', 'dotted'
+      axs[i].semilogy(gap, label=string(a), color="C$j")
+      axs[i].semilogy(inner_it, inner./lb[inner_it] .- 1, linestyle="--", color="C$j")
+      axs[i].semilogy(io_ub./io_lb .- 1, linestyle="dashdot", color="C$j")
+      j+=1
+    end
   end
   axs[i].legend(title="α")
   axs[i].set_title("β = $b")
 end
 
-fig.suptitle(dir * " - Lipschitz factor: $lip_factor")
+fig.suptitle("Model: $dir - Lipschitz factor: $lip_factor
+             solid: primal-dual gap / dashed: primal-recursive gap / dashdot: outer-inner gap")
+fig.tight_layout()
 plt.savefig(joinpath("data", "output", cfg["save_path"], "Lip$(lip_factor)_tr.pdf"))
