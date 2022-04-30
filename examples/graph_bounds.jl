@@ -39,6 +39,19 @@ nalphas = length(alphas)
 nbetas = length(betas)
 
 
+function plot_step(ax, times, values;
+                   range::Union{Nothing,Tuple{Int,Int}}=nothing, kwargs...)
+  n = length(times)
+  xs = repeat(times, 1, 2)'  |> (x -> reshape(x, 1,2n))
+  ys = repeat(values, 1, 2)' |> (x -> reshape(x, 1,2n))
+  if range == nothing
+    ax.plot(xs[2:end], ys[1:end-1]; kwargs...)
+  else
+    idxs = (range[1] .<= xs .<= range[2])
+    ax.plot(xs[idxs], ys[1:end-1][idxs[2:end]]; kwargs...)
+  end
+end
+
 function plot_bounds(n_init, n_end, title)
     plot_it = collect(n_init:n_end)
 
@@ -53,7 +66,7 @@ function plot_bounds(n_init, n_end, title)
                 lb, ub, inner, inner_it, io_lb, io_ub = bounds_dict[(a,b)]
                 # '-', '--', '-.', ':', 'None', ' ', '', 'solid', 'dashed', 'dashdot', 'dotted'
                 axs[i,j].plot(plot_it,ub[n_init:n_end], label="Dual UB", color="C1")
-                axs[i,j].plot(inner_it, inner, label="Philpott UB", color="C2")
+                plot_step(axs[i,j], inner_it, inner, range=(n_init,n_end), label="Philpott UB", color="C2")
                 axs[i,j].plot(plot_it,io_ub[n_init:n_end], label="Baucke UB", linestyle="--", color="C3")
                 axs[i,j].plot(plot_it,io_lb[n_init:n_end], label="Baucke LB",  linestyle="--",color="C4")
                 axs[i,j].plot(plot_it,lb[n_init:n_end], label="SDDP LB", color="C5")
