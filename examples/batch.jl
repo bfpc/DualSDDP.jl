@@ -102,66 +102,55 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
     # Regularization for probabilities in dual forward
     epsilon = params["epsilon"]
 
-    # Empty vector
-    empty = Float64[]
+    # Dict of data to be saved
+    data = Dict()
 
     # Solution algorithms
     # Pure dual
     if dual
-      #println("Forward regularization: $(epsilon)")
       seed!(3)
       dual_pb, dual_ubs, dual_times = dualsolve(M, nstages, risk_dual, solver, state0, params["dual_iters"]; verbose=true, epsilon = epsilon)
-    else
-      dual_pb, dual_ubs, dual_times = empty,empty,empty
+      # Collect bounds, iteration times and value functions
+      data["dual ub"] = dual_ubs
+      data["dual t"]  = dual_times
+      save_dual_vfs!(data, primal_pb)
     end
 
     # Primal with interior bounds
-
     if (primal || philpott_ub)
       seed!(2)
       primal_pb, primal_trajs, primal_lbs, primal_times = primalsolve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true)
+
+      # Collect bounds, iteration times and value functions
+      data["primal lb"] = primal_lbs
+      data["primal t"]  = primal_times
+      save_primal_vfs!(data, primal_pb)
 
       if philpott_ub
         # Compute ub from primal trajectories "à la Philpott et al."
         ub_step = params["ub_step"]
         iters_ub = ub_step:ub_step:params["primal_iters"]
         ubs_p, ubs_times = primalub(M, nstages, risk, solver, primal_trajs, iters_ub; verbose=true)
-      else
-        ubs_p, ubs_times = empty,empty
+        # Collect bounds, iterations and iteration times
+        data["inner recursive iters"] = first.(ubs_p)
+        data["inner recursive bound"] = last.(ubs_p)
+        data["inner recursive t"] = ubs_times
       end
-    else
-      primal_pb, primal_trajs, primal_lbs, primal_times = empty,empty,empty,empty
-      ubs_p, ubs_times = empty,empty
     end
 
     # Primal with inner and outer bounds
     if pb_child
       seed!(4)
       io_pb, io_lbs, io_ubs, io_times = problem_child_solve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true)
-    else
-      io_pb, io_lbs, io_ubs, io_times = empty,empty,empty,empty
+      # Collect bounds and iteration times
+      data["io lb"] = io_lbs
+      data["io ub"] = io_ubs
+      data["io t"]  = io_times
+      # TODO
+      # pb_child && save_io_vfs!(data, io_pb)
     end
 
-
-    # Saving info
-    data = Dict()
-    #   Bounds
-    data["primal lb"] = primal_lbs
-    data["primal t"]  = primal_times
-    data["dual ub"]   = dual_ubs
-    data["dual t"]    = dual_times
-    data["inner recursive iters"] = first.(ubs_p)
-    data["inner recursive bound"] = last.(ubs_p)
-    data["inner recursive t"] = ubs_times
-    data["io lb"] = io_lbs
-    data["io ub"] = io_ubs
-    data["io t"]  = io_times
-
-    primal && save_primal_vfs!(data, primal_pb)
-    dual   && save_dual_vfs!(data, dual_pb)
-    # TODO
-    # pb_child && save_io_vfs!(data, io_pb)
-
+    # Save collected data to disk
     save(cfg, data)
 end
 
