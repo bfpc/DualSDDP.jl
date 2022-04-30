@@ -75,8 +75,8 @@ function plot_bounds(n_init, n_end, title)
         axs[1,nbetas].legend()
     end
 
-    fig.suptitle(dir * " - Lipschitz factor: $lip_factor")
-    println(joinpath("data", "output", cfg["save_path"], "$title.pdf"))
+    fig.suptitle("Model: $dir - Lipschitz factor: $lip_factor")
+    fig.tight_layout()
     plt.savefig(joinpath("data", "output", cfg["save_path"], "$title.pdf"))
 end
 
