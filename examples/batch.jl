@@ -102,6 +102,9 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
     # Regularization for probabilities in dual forward
     epsilon = params["epsilon"]
 
+    # Empty vector
+    empty = Float64[]
+
     # Solution algorithms
     # Pure dual
     if dual
@@ -109,7 +112,7 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
       seed!(3)
       dual_pb, dual_ubs, dual_times = dualsolve(M, nstages, risk_dual, solver, state0, params["dual_iters"]; verbose=true, epsilon = epsilon)
     else
-      dual_pb, dual_ubs, dual_times = [],[],[]
+      dual_pb, dual_ubs, dual_times = empty,empty,empty
     end
 
     # Primal with interior bounds
@@ -124,11 +127,11 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
         iters_ub = ub_step:ub_step:params["primal_iters"]
         ubs_p, ubs_times = primalub(M, nstages, risk, solver, primal_trajs, iters_ub; verbose=true)
       else
-        ubs_p, ubs_times = [],[]
+        ubs_p, ubs_times = empty,empty
       end
     else
-      primal_pb, primal_trajs, primal_lbs, primal_times = [],[],[],[]
-      ubs_p, ubs_times = [],[]
+      primal_pb, primal_trajs, primal_lbs, primal_times = empty,empty,empty,empty
+      ubs_p, ubs_times = empty,empty
     end
 
     # Primal with inner and outer bounds
@@ -136,7 +139,7 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
       seed!(4)
       io_pb, io_lbs, io_ubs, io_times = problem_child_solve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true)
     else
-      io_pb, io_lbs, io_ubs, io_times = [],[],[],[]
+      io_pb, io_lbs, io_ubs, io_times = empty,empty,empty,empty
     end
 
 
