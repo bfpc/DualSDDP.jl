@@ -1,5 +1,5 @@
 {
-    "save_path": "2d_cases/Lip1-12stages-82br-alpha01-beta05-epsilon",
+    "save_path": "2d_cases/Lip1-12stages-82br-alpha01-beta05-epsilon-bis",
 
     "experiment": {
         "dir": "2d_hydro",
@@ -13,7 +13,7 @@
         "primal_iters": 10,
         "ub_step":5,
         "dual_iters": 500,
-        "epsilon": [1, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6],
+        "epsilon": [1, 1e-1, 1e-2, 1e-3, 1e-4],
         "start month": 1
     },
 

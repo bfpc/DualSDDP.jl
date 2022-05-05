@@ -1,3 +1,10 @@
+In the paper
+====
+* Impact de alpha -> faire la diagonale
+* Impact de L -> faire un tableau
+* Impact nombre de scénario -> ? 
+* Comparison Philpott / Reagan
+
 Tests
 =====
 
@@ -32,5 +39,5 @@ Code
 
 Detailed Algorithm
 
-Exemples (2 from paper + "evil" child -> not required)
+Exemples (2 from paper)
 Complete results (tables, ...)
