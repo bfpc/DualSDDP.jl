@@ -113,7 +113,7 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
       # Collect bounds, iteration times and value functions
       data["dual ub"] = dual_ubs
       data["dual t"]  = dual_times
-      save_dual_vfs!(data, primal_pb)
+      save_dual_vfs!(data, dual_pb)
     end
 
     # Primal with interior bounds
