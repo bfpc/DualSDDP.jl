@@ -87,17 +87,18 @@ function smallmultiples(bounds_dict; log::Bool=false)
       end
       axs[i,j].set_title("α = $alpha, β = $beta")
       if log
-        axs[i,j].yscale("log")
+        axs[i,j].set_yscale("log")
       end
     end
   end
   axs[1,end].legend(title="Regularization ϵ")
   fig.suptitle("Upper bounds in dual algorithm - Lipschitz constant = $lip_factor")
   fig.tight_layout()
-  plt.show()
   if interact
     plt.ion()
   end
+  plt.savefig(joinpath("data", "output", cfg["save_path"], "Epsilon-smallmultiples.pdf"))
+  plt.show()
 end
 
 bounds_dict = read_abe(cfg)
