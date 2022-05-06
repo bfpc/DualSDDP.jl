@@ -180,6 +180,18 @@ N = total_combinations(cfg)
 for idx=1:N
     parse!(cfg, idx)
 
+    # Hack to change lip_factor / nscen
+    global lip_factor
+    global nscen
+    global MyModule
+    new_lip_factor = cfg["parameters"]["Lip"]
+    new_nscen = cfg["parameters"]["nscen"]
+    if (new_lip_factor != lip_factor) || (new_nscen != nscen)
+      MyModule = include(joinpath(dir, cfg["experiment"]["Model"]))
+      lip_factor = new_lip_factor
+      nscen = new_nscen
+    end
+
     α = cfg["risk-aversion"]["alpha"]
     β = cfg["risk-aversion"]["beta"]
     nstages = cfg["parameters"]["nstages"]
