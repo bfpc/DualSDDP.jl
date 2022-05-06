@@ -81,8 +81,7 @@ function save_dual_vfs!(data, dual_pb)
     return
 end
 
-function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
-    primal = true, dual = true, philpott_ub = true, pb_child = true)
+function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64})
     # Risk Aversion
     ra     = cfg["risk-aversion"]
     alpha  = ra["alpha"]
@@ -159,17 +158,16 @@ end
 cfg_name = ARGS[1]
 cfg = ConfigManager(cfg_name, @__DIR__)
 
-N = total_combinations(cfg)
-
-# These are "unparametrizable" yet
+# Global configuration
 parse!(cfg, 1)
 
+# lip_factor and nscen should be in Main namespace for include() to work
 dir = cfg["experiment"]["dir"]
 lip_factor = cfg["parameters"]["Lip"]
 nscen = cfg["parameters"]["nscen"]
 MyModule = include(joinpath(dir, cfg["experiment"]["Model"]))
 
-# If all went well, we save the current config file to the output directory
+# If all went well, save the current config file to the output directory
 outdir = joinpath("data", "output", cfg["save_path"])
 mkpath(outdir)
 cfg_save = joinpath(outdir, cfg_name)
@@ -178,11 +176,10 @@ chmod(cfg_save, 0o440)
 
 ttime = 0
 
+N = total_combinations(cfg)
 for idx=1:N
     parse!(cfg, idx)
 
-    # Remove references to specific "module" name?
-    #print(cfg)
     α = cfg["risk-aversion"]["alpha"]
     β = cfg["risk-aversion"]["beta"]
     nstages = cfg["parameters"]["nstages"]
