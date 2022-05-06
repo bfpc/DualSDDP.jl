@@ -13,6 +13,8 @@ solver = JuMP.optimizer_with_attributes(() -> Gurobi.Optimizer(env), "OutputFlag
 # import GLPK
 # solver = GLPK.Optimizer
 
+nprint = 25 #printing of current results
+
 function save_primal_vfs!(data, primal_pb)
     nstages = length(primal_pb)
 
@@ -109,7 +111,7 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
     # Pure dual
     if dual
       seed!(3)
-      dual_pb, dual_ubs, dual_times = dualsolve(M, nstages, risk_dual, solver, state0, params["dual_iters"]; verbose=true, epsilon = epsilon)
+      dual_pb, dual_ubs, dual_times = dualsolve(M, nstages, risk_dual, solver, state0, params["dual_iters"]; verbose=true, epsilon = epsilon, nprint = nprint)
       # Collect bounds, iteration times and value functions
       data["dual ub"] = dual_ubs
       data["dual t"]  = dual_times
@@ -119,7 +121,7 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
     # Primal with interior bounds
     if (primal || philpott_ub)
       seed!(2)
-      primal_pb, primal_trajs, primal_lbs, primal_times = primalsolve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true)
+      primal_pb, primal_trajs, primal_lbs, primal_times = primalsolve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true, nprint = nprint)
 
       # Collect bounds, iteration times and value functions
       data["primal lb"] = primal_lbs
@@ -141,7 +143,7 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64};
     # Primal with inner and outer bounds
     if pb_child
       seed!(4)
-      io_pb, io_lbs, io_ubs, io_times = problem_child_solve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true)
+      io_pb, io_lbs, io_ubs, io_times = problem_child_solve(M, nstages, risk, solver, state0, params["primal_iters"]; verbose=true,nprint = nprint)
       # Collect bounds and iteration times
       data["io lb"] = io_lbs
       data["io ub"] = io_ubs

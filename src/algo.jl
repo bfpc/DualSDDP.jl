@@ -263,7 +263,7 @@ function primalub(M, nstages, risk,solver,trajs,niters;verbose = false)
     end
     Ubs = convex_ub(stages, trajs[1:n])
     end
-    verbose && println("Primal (Philpott) UB at iteration $n: $(Ubs[1,1])")
+    verbose && println("Iteration $n: (Philpott) UB = $(Ubs[1,1])")
     push!(ub,(n,Ubs[1,1]))
     push!(times, dt)
   end
