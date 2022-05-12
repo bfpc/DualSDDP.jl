@@ -1,16 +1,15 @@
 In the paper
 ====
-* Impact de alpha -> faire la diagonale
-* Impact de L -> faire un tableau
-* Impact nombre de scénario -> ? 
-* Comparison Philpott / Reagan
+* Impact de L -> faire un tableau ou une simple remarque ? 
+* Impact nombre de scénario -> A tester
+* Comparison Philpott / Reagan : via la diagonale
 
 Tests
 =====
 
-Number of scenarios
+Number of scenarios 
 
-Lipschitz Cst
+Lipschitz Cst :ok
 
 Numerical Experiments
 ======
@@ -18,14 +17,9 @@ Test 1d
 * fine step alpha / beta x Lip : 1 / 10 / 100 / 1000 
 * horizon by default
 
-Test 2d 
-* [alpha, beta] -> 9
-* finir T = 12 (exemples 8-9 dans la boucle de param)
-* test Lipschitz 1 / 100
-* T = 6 / 24  ? 
 
 Test 4d
-* A voir 
+* Test nombre de scenario (82 / 40 / 20 /10)
 
 
 Plots
