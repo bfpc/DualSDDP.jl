@@ -187,9 +187,9 @@ for idx=1:N
     new_lip_factor = cfg["parameters"]["Lip"]
     new_nscen = cfg["parameters"]["nscen"]
     if (new_lip_factor != lip_factor) || (new_nscen != nscen)
-      MyModule = include(joinpath(dir, cfg["experiment"]["Model"]))
       lip_factor = new_lip_factor
       nscen = new_nscen
+      MyModule = include(joinpath(dir, cfg["experiment"]["Model"]))
     end
 
     α = cfg["risk-aversion"]["alpha"]
