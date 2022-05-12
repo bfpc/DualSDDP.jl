@@ -197,7 +197,7 @@ for idx=1:N
     nstages = cfg["parameters"]["nstages"]
     ε = cfg["parameters"]["epsilon"]
     println("##################################")
-    println("$idx/$N experience $dir with horizon $nstages for α=$α, β=$β, Lip_factor=$lip_factor and ε=$ε")
+    println("$idx/$N experience $dir with horizon $nstages, $nscen branches/stage, for α=$α, β=$β, Lip_factor=$lip_factor and ε=$ε")
     println("##################################")
 
     global ttime += @elapsed experiment(cfg, MyModule.M, MyModule.inivol)
