@@ -1,31 +1,16 @@
 In the paper
 ====
-* Impact de L -> faire un tableau ou une simple remarque ? 
-* Impact nombre de scénario -> A tester
-* Comparison Philpott / Reagan : via la diagonale
-
-Tests
-=====
-
-Number of scenarios 
-
-Lipschitz Cst :ok
-
-Numerical Experiments
-======
-Test 1d 
-* fine step alpha / beta x Lip : 1 / 10 / 100 / 1000 
-* horizon by default
+* BdC: Impact nombre de scénario -> A analyser avec les temps
+  
+* VL: Comparison Philpott / Reagan : via la diagonale 
+* VL: faire tourner 4d Lip 1 pour sortir la diagonale
+* VL: regarder changement vitesse vs \alpha
 
 
-Test 4d
-* Test nombre de scenario (82 / 40 / 20 /10)
+
+* BdC: Ajuster le caclul du  dual pour que 16=12
 
 
-Plots
-======
-
-* Plot bounds (not gap)  2 per case 25-100, 100-500 (to be ajusted) 
 
 Documentation
 =============
