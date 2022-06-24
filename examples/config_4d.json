@@ -1,5 +1,5 @@
 {
-    "save_path": "4d_cases/Lip10-12stages-82br-alpha-beta",
+    "save_path": "4d_cases/Lip1-12stages-82br-alpha-beta",
 
     "experiment": {
         "dir": "4d_hydro",
@@ -7,7 +7,7 @@
     },
 
     "parameters": {
-        "Lip": 10,
+        "Lip": 1,
         "nscen": 0,
         "nstages": 12,
         "primal_iters": 300,
