@@ -1,4 +1,4 @@
-ARGS=["config_2d.json"]
+ARGS=["config_4d.json"]
 
 import Pkg
 Pkg.activate(".")
@@ -67,14 +67,15 @@ function plot_bounds(n_init, n_end, title)
             if haskey(bounds_dict,(a,b))
                 lb, ub, inner, inner_it, io_lb, io_ub = bounds_dict[(a,b)]
                 #'-', '--', '-.', ':', 'None', ' ', '', 'solid', 'dashed', 'dashdot', 'dotted'
-                axs[i,j].plot(plot_it,ub[n_init:n_end], label="Dual UB", color="C1")
-                plot_step(axs[i,j], inner_it, inner, range=(n_init,n_end), label="Philpott UB", color="C2")
-                axs[i,j].plot(plot_it,io_ub[n_init:n_end], label="Baucke UB", linestyle="--", color="C3")
-                axs[i,j].plot(plot_it,io_lb[n_init:n_end], label="Baucke LB",  linestyle="--",color="C4")
-                axs[i,j].plot(plot_it,lb[n_init:n_end], label="SDDP LB", color="C5")
-                # axs[i,j].plot(plot_it,(ub[n_init:n_end].-lb[n_init:n_end])./lb[n_init:n_end], label="Dual gap", color="C1")           
-                # axs[i,j].plot(plot_it,(io_ub[n_init:n_end].-io_lb[n_init:n_end])./io_lb[n_init:n_end], label="Baucke gap", color="C3")
-                # axs[i,j][:set_ylim]([0,0.4])
+                # axs[i,j].plot(plot_it,ub[n_init:n_end], label="Dual UB", color="C1")
+                # plot_step(axs[i,j], inner_it, inner, range=(n_init,n_end), label="Philpott UB", color="C2")
+                # axs[i,j].plot(plot_it,io_ub[n_init:n_end], label="Baucke UB", linestyle="--", color="C3")
+                # axs[i,j].plot(plot_it,io_lb[n_init:n_end], label="Baucke LB",  linestyle="--",color="C4")
+                # axs[i,j].plot(plot_it,lb[n_init:n_end], label="SDDP LB", color="C5")
+                axs[i,j].plot(plot_it,(ub[n_init:n_end].-lb[n_init:n_end])./lb[n_init:n_end], label="Dual gap", color="C1")  
+                # plot_step(axs[i,j], inner_it, inner, range=(n_init,n_end), label="Philpott UB", color="C2")         
+                axs[i,j].plot(plot_it,(io_ub[n_init:n_end].-io_lb[n_init:n_end])./io_lb[n_init:n_end], label="Baucke gap", color="C3")
+                axs[i,j][:set_ylim]([0,0.4])
             end
         end
         axs[1,1].legend()
@@ -85,4 +86,4 @@ function plot_bounds(n_init, n_end, title)
     plt.savefig(joinpath("data", "output", cfg["save_path"], "$title.pdf"))
 end
 
-plot_bounds(100, 300, "Gap_end_Lip$lip_factor")
+plot_bounds(100, 300, "Gap_end_Lip$(lip_factor)_relative")
