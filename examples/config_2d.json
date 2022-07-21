@@ -1,5 +1,5 @@
 {
-    "save_path": "2d_cases/Lip10-24stages-82br-alpha-beta",
+    "save_path": "2d_cases/12stages-82br-alpha-beta-lip",
 
     "experiment": {
         "dir": "2d_hydro",
@@ -7,12 +7,12 @@
     },
 
     "parameters": {
-        "Lip": 10,
+        "Lip": [1, 10, 100],
         "nscen": 0,
-        "nstages": 24,
-        "primal_iters": 500,
+        "nstages": 12,
+        "primal_iters": 200,
         "ub_step":25,
-        "dual_iters": 500,
+        "dual_iters": 200,
         "epsilon": 1e-2,
         "start month": 1
     },
@@ -20,13 +20,12 @@
     "algorithms": {
         "dual": true,
         "primal": true,
-        "philpott_ub":true,
-        "pb_child":true
+        "philpott_ub": true,
+        "pb_child": true
     },
 
     "risk-aversion": {
         "alpha": [0.1, 0.3, 0.5],
         "beta": [0.1, 0.5, 1.0]
     }
-    
 }

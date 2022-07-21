@@ -8,7 +8,7 @@
 
     "parameters": {
         "Lip": 1,
-        "nscen": [5, 10, 20, 40],
+        "nscen": [5, 10, 20, 30],
         "nstages": 4,
         "primal_iters": 100,
         "ub_step":10,

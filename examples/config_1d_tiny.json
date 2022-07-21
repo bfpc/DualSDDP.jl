@@ -1,17 +1,17 @@
 {
-    "save_path": "2d_cases/12stages-10br-alpha-beta-lip",
+    "save_path": "1d_cases/tiny",
 
     "experiment": {
-        "dir": "2d_hydro",
-        "Model": "hydro_hist.jl"
+        "dir": "1d_toy",
+        "Model": "hydro.jl"
     },
 
     "parameters": {
-        "Lip": [1,10,100],
+        "Lip": 1,
         "nscen": 10,
-        "nstages": 12,
+        "nstages": 4,
         "primal_iters": 100,
-        "ub_step":25,
+        "ub_step":10,
         "dual_iters": 100,
         "epsilon": 1e-2,
         "start month": 1
@@ -25,7 +25,7 @@
     },
 
     "risk-aversion": {
-        "alpha": [0.1, 0.3, 0.5],
+        "alpha": [0.1, 0.5, 0.9],
         "beta": [0.1, 0.5, 0.9]
     }
 
