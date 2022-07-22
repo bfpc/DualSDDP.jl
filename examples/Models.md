@@ -6,16 +6,16 @@ We consider a hydro-thermal generation planning model.
 
 Each hydro reservoir has a certain stored volume $v_\text{ini}$,
 and will get a random inflow $I(\omega)$ along the planning period.
-The hydro plants have a maximum power generation $\bar{gh}$,
+The hydro plants have a maximum power generation $\bar{g^h}$,
 and can further spill water (at unlimited capacity),
 so that the reservoir stored volume at the end of the planning period is
-$$v_\text{end} = v_\text{ini} + I(\omega) - gh - \text{spill}$$
+$$v_{\text{end}} = v_\text{ini} + I(\omega) - g^h - \text{spill}$$
 for each reservoir.
 
 Given this dynamic, let's now expose the static problem
 for a given time period.
 Each thermal unit $k$ has a minimum and maximum power generation,
-$\underline{gt_k}$ and $\bar{gt_k}$,
+$\underline{g^t_k}$ and $\bar{gt_k}$,
 and a unit cost $c_k$.
 Combining hydro and thermal generation at each system $s$,
 and allowing for power exchanges between systems,
@@ -30,20 +30,22 @@ of load shedding, with increasing unit costs per level.
 
 We have
 
-$$\begin{array}{rl}
-\min & \mathbb{E}\left[ \sum_{\tau=1}^T c \cdot gt_\tau + M \text{def}_\tau \right] \\
-\text{s.t.} & \underline{gt} \leq gt_\tau \leq \bar{gt} \\
-            & 0 \leq gh_\tau \leq \bar{gh} \\
+
+
+$$\begin{align*}
+\min \qquad  & \mathbb{E}\left[ \sum_{\tau=1}^T c \cdot g^t_\tau + M \text{def}_\tau \right] \\
+\text{s.t.} \qquad & \underline{g^t} \leq g^t_\tau \leq \bar{g^t} \\
+            & 0 \leq g^h_\tau \leq \bar{g^h} \\
             & 0 \leq \text{def}_\tau \\
-            & v_{\text{end},\tau} = v_{\text{ini},\tau} + I_\tau(\omega) - gh_\tau - \text{spill}_\tau \\
-            & MH gh_\tau + MT gt_\tau + \text{def}_\tau + Xch_\tau = D_\tau
-\end{array}$$
+            & v_{\text{end},\tau} = v_{\text{ini},\tau} + I_\tau(\omega) - g^h_\tau - \text{spill}_\tau \\
+            & M_H g_{\tau}^h + M_T g^t_{\tau} + \text{def}_\tau + X^{ch}_{\tau} = D_\tau
+\end{align*}$$
 
 Here, most variables are vectors:
 $c$ for unit costs for thermal generation,
-$gt_\tau$ for planned thermal generation at each plant at stage $\tau$,
-$gh$ for planned hydro generation, and so on.
-The matrices $MH$ and $MT$ are incidence matrices
+$g^t_\tau$ for planned thermal generation at each plant at stage $\tau$,
+$g^h$ for planned hydro generation, and so on.
+The matrices $M_H$ and $M_T$ are incidence matrices
 that indicate to which system a given plant is attached.
 
 ## The test cases
