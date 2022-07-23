@@ -58,7 +58,7 @@ function plot_bounds(n_init, n_end, title)
     plot_it = collect(n_init:n_end)
 
     #fig, axs = plt.subplots(nrows=nbetas, ncols=nalphas, figsize=(11,11))
-    fig, axs = plt.subplots(nrows=nbetas, ncols=1, figsize=(4,12))
+    fig, axs = plt.subplots(nrows=nbetas, ncols=1, figsize=(4,10))
     # horizontal
     #fig, axs = plt.subplots(nrows=1, ncols=nalphas, figsize=(11,11))
     for i in 1:nalphas
