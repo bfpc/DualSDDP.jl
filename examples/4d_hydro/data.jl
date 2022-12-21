@@ -1,3 +1,4 @@
+# index, name
 SYSTEMS_DATA = [
   [1,	"SUDESTE"],
   [2,	"SUL"],
@@ -6,6 +7,7 @@ SYSTEMS_DATA = [
   [5,	"NOFICT1"],
 ]
 
+# deficit level, percentage of load curtailment, cost in this level
 ENERGY_DEFICITS_DATA = [
   [1,	0.05,	1420.34],
   [2,	0.05,	3064.15],
@@ -13,7 +15,7 @@ ENERGY_DEFICITS_DATA = [
   [4,	0.80,	7276.40],
 ]
 
-
+# index, subsystem, unit cost, minimum generation, maximum generation
 THERMAL_PLANTS = [
   [  1,    1,     23.21,    614.26,       640],
   [ 13,    1,     20.12,    1335.6,      1350],
@@ -143,6 +145,7 @@ THERMAL_PLANTS = [
   [209,    4,         0,        63,        93],
 ]
 
+# subsystem, maximum generation, maximum stored energy, initial stored energy
 HYDRO_PLANTS = [
   [1,   45578.9,  204078.3,   38343.9],
   [2,   13967.0,   19929.2,   10068.8],
@@ -150,6 +153,7 @@ HYDRO_PLANTS = [
   [4,    9666.2,   15765.5,    5161.9],
 ]
 
+# subsystem (source), exchange bounds
 ENERGY_EXCHANGES_CAPACITY_BETWEEN_SYSTEMS = [
   [1,  99999999,      7500,      1000,         0,      4000],
   [2,      5470,  99999999,         0,         0,         0],
@@ -158,6 +162,7 @@ ENERGY_EXCHANGES_CAPACITY_BETWEEN_SYSTEMS = [
   [5,      2940,         0,      3300,      4407,  99999999],
 ]
 
+# subsystem (source), penalties
 ENERGY_EXCHANGES_PENALTIES = [
   [1,         0,     0.001,     0.001,     0.001,    0.0005],
   [2,     0.001,         0,     0.001,     0.001,    0.0005],

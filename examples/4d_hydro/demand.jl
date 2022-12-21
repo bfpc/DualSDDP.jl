@@ -1,3 +1,4 @@
+# Stage t, subsystems 1 through 4, plus 5th node
 ENERGY_DEMAND = [
       1       50650.8       15074.4       11737.2          6294             0;
       2       52406.4       15417.6       11464.8        6475.2             0;
