@@ -101,7 +101,7 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64})
     params  = cfg["parameters"]
     nstages = params["nstages"]
     # Regularization for probabilities in dual forward
-    epsilon = params["epsilon"]
+    ϵ = params["epsilon"]
 
     # Dict of data to be saved
     data = Dict()
@@ -110,7 +110,7 @@ function experiment(cfg::ConfigManager, M::MSLBO, state0::Vector{Float64})
     # Pure dual
     if dual
       seed!(3)
-      dual_pb, dual_ubs, dual_times = dualsolve(M, nstages, risk_dual, solver, state0, params["dual_iters"]; verbose=true, epsilon = epsilon, nprint = nprint)
+      dual_pb, dual_ubs, dual_times = dualsolve(M, nstages, risk_dual, solver, state0, params["dual_iters"]; verbose=true, ϵ, nprint)
       # Collect bounds, iteration times and value functions
       data["dual ub"] = dual_ubs
       data["dual t"]  = dual_times

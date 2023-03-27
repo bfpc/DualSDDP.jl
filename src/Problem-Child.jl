@@ -22,14 +22,14 @@ end
 
 """ Object representing both inner and outer problem 
 
-outer is a collection of JuMP model representing the outer problem for each branch
-inner is a collection of JuMP model representing the inner problem for each branch
-prob is the reference probability 
-n_branches is the number of branch per stage 
-risk is a function building a JuMP model 
-cuts is a collection of primal cuts 
+outer is a collection of JuMP models representing the outer problem for each branch
+inner is a collection of JuMP models representing the inner problem for each branch
+prob is the reference probability
+n_branches is the number of branch per stage
+risk is a function building a JuMP model
+cuts is a collection of primal cuts
 inner_vertices is a collection of vertices inside the epigraph
-ub_model is a JuMP model to compute the upper bound 
+ub_model is a JuMP model to compute the upper bound
 """
 struct IO_stage
     outer :: Vector{Model}
@@ -60,7 +60,7 @@ function mk_primal_io(M::MSLBO, T::Int, risk)
         n_branches = length(prob)
         risk = risk
         ub_model = mk_primal_ub_model(M, t, T)
-        if t == T 
+        if t == T
             for m in inner
                 JuMP.set_objective_coefficient(m,m[:_z],0)
             end

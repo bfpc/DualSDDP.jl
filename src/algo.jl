@@ -16,16 +16,17 @@ end
 
 "Make a forward primal pass starting from state0"
 function forward(stages, state0; debug=0,return_traj =false)
-  if return_traj
-    traj=[state0]
-  end
+  traj = [state0]
+  branches = Int64[]
+
   for (i,stage) in enumerate(stages)
     set_initial_state!(stage, state0)
     opt_recover(stage, "primal_fw", "Primal, forward: Failed to solve for $(i)-th stage.\nInitial state $(state0)")
 
     j = choose(stage.ext[:prob])
     state0 = JuMP.value.(stage.ext[:vars][1][:,j])
-    return_traj && push!(traj,state0)
+    push!(traj, state0)
+    push!(branches, j)
     if debug > 0
       println("Going out from stage $i, branch $j, state $state0")
       if debug > 1
@@ -33,6 +34,9 @@ function forward(stages, state0; debug=0,return_traj =false)
       end
     end
   end
+
+  push!(stages.ext[:trajs], traj)
+  push!(stages.ext[:branches], branches)
   return_traj && return traj
 end
 
@@ -44,13 +48,32 @@ function init_dual(stages, x0)
   JuMP.set_objective_function(m1, o1 - m1[:π0]'*x0)
 end
 
+function normalize_state(γ0, π0, solvertol, stage; debug=0)
+  if γ0 < solvertol
+    if debug > 0
+      println("Setting γ0 = $(γ0) to zero, below solver tolerance $(solvertol).")
+      println("    Control dual var:", JuMP.value.(stage[:ξ]))
+      println("  Scenario variables:", JuMP.value.(stage[:λ][:,j]))
+      println("                    :", JuMP.value.(stage[:π][:,j]))
+    end
+    return (0.0, π0)
+  else
+    if debug > 1
+      println("Normalizing γ0 = $(γ0) to one")
+    end
+    return (1.0, π0 ./ γ0)
+  end
+end
+
 """ Make a foward pass in the dual
 
-epsilon is a regularization parameter that guarantee selection of all nodes we positive probability
-normalize the cut to γ=1 if γ > 0.
+`ϵ` is a regularization parameter that guarantees selection of all nodes
+with positive probability
+if `normalize`, we set `γ=1` (and `π` accordingly) if `γ > solvertol`.
 """
-function forward_dual(stages; debug=0, normalize=false, solvertol=1e-5, epsilon = 1e-2)
-  ϵ = epsilon 
+function forward_dual(stages; debug=0, normalize=false, solvertol=1e-5, ϵ = 1e-2)
+  traj = DualState[]
+  branches = Int64[]
 
   gamma0 = 1.0
   state0 = Float64[]
@@ -59,6 +82,9 @@ function forward_dual(stages; debug=0, normalize=false, solvertol=1e-5, epsilon 
       set_initial_state!(stage, state0, gamma0)
     end
     opt_recover(stage, "dual_fw", "Dual, forward: Failed to solve for $(i)-th stage.\nInitial state $(state0), $(gamma0)")
+    if i == 1
+        traj = [(1, JuMP.value.(stage.ext[:vars][3]))]
+    end
 
     # Study Lipschitz constant constraints
     L = stage.ext[:lip]
@@ -80,22 +106,11 @@ function forward_dual(stages; debug=0, normalize=false, solvertol=1e-5, epsilon 
     j = choose(gammas_r, norm=sum(gammas_r))
     state0 = JuMP.value.(stage.ext[:vars][1][:,j])
     gamma0 = gammas[j]
-    if normalize && (gamma0 < solvertol)
-      if debug > 0
-        println("Setting γ0 = $(gamma0) to zero, below solver tolerance $(solvertol).")
-        println("  Scenario variables:", JuMP.value.(stage[:λ][:,j]))
-        println("                    :", JuMP.value.(stage[:ξ][:,j]))
-        println("                    :", JuMP.value.(stage[:π][:,j]))
-      end
-      gamma0 = 0.0
+    if normalize
+      gamma0, state0 = normalize_state(gamma0, state0, solvertol, stage; debug)
     end
-    if normalize && (gamma0 > solvertol)
-      if debug > 1
-        println("Normalizing γ0 = $(gamma0) to one")
-      end
-      state0 ./= gamma0
-      gamma0   = 1.0
-    end
+    push!(traj, (gamma0, state0))
+    push!(branches, j)
     if debug > 0
       println("Going out from stage $i, branch $j, state $state0, prob $gamma0")
       if debug > 1
@@ -107,11 +122,13 @@ function forward_dual(stages; debug=0, normalize=false, solvertol=1e-5, epsilon 
     end
   end
   if gamma0 == 0
-    println("Finished at gamma = 0")
+    println("Finished at γ = 0")
   end
+  push!(stages.ext[:trajs], traj)
+  push!(stages.ext[:branches], branches)
 end
 
-""" Add a primal cut 
+""" Add a primal cut
 
 stage is the current stage problem, at which the cut is added
 next is the next stage problem whose dual variable is obtained to define the cut 
@@ -148,7 +165,7 @@ function compute_cut(stage, next, next_state::Vector{Float64})
   return [cst, multipliers, next_state, cst - multipliers'*next_state]
 end
 
-""" Add a dual cut 
+""" Add a dual cut
 
 stage is the current stage problem, at which the cut is added
 next is the next stage problem whose dual variable is obtained to define the cut 
@@ -191,7 +208,7 @@ function backward_dual(stages)
   end
 end
 
-""" 
+"""
 Solve the problem through primal SDDP
 
 M is a MSLBO representing the problem
@@ -219,7 +236,7 @@ function primalsolve(M::MSLBO, nstages, risk, solver, state0, niters;
     push!(trajs, traj)
     lb = JuMP.objective_value(pb[1])
     push!(lbs, lb)
-    
+
     if verbose && (i % nprint == 0)
       println("Iteration $i: LB = ", lb)
     end
@@ -286,7 +303,7 @@ function primalub(M, nstages, risk,solver,trajs,niters;verbose = false)
 end
 
 
-""" 
+"""
 Solve the problem through dual SDDP
 
 M is a MSLBO
@@ -295,7 +312,7 @@ risk is a function building the risk measure
 state0 is the initial state
 niters is the number of iterations ran before stopping
 """
-function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters; verbose=false, nprint=10, epsilon = 1e-2)
+function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters; verbose=false, nprint=10, ϵ = 1e-2)
   pb = mk_dual_decomp(M, nstages, risk)
   for m in pb
     JuMP.set_optimizer(m, solver)
@@ -310,7 +327,7 @@ function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters; verbose=fals
     for m in pb
       m.ext[:iteration] = i
     end
-    dt = @elapsed forward_dual(pb; normalize=true, epsilon = epsilon)
+    dt = @elapsed forward_dual(pb; normalize=true, ϵ)
     ub = -JuMP.objective_value(pb[1])
     push!(ubs, ub)
     if verbose && (i % nprint == 0)

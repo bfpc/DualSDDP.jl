@@ -55,6 +55,8 @@ function mk_primal_decomp(M::MSLBO, T::Int, risk)
     m.ext[:prob] = prob
     m.ext[:lip]  = M.Lip(t, T)
     m.ext[:cuts] = PrimalCut[]
+    m.ext[:trajs] = Vector{State}[]
+    m.ext[:branches] = Vector{Int64}[]
     push!(stages, m)
   end
   return stages
@@ -126,7 +128,8 @@ function mk_dual_decomp(M::MSLBO, T::Int, dualrisk)
     m.ext[:lip]  = M.Lip(t, T)
     m.ext[:cuts] = DualCut[]
     m.ext[:info] = Dict()
-
+    m.ext[:trajs] = Vector{DualState}[]
+    m.ext[:branches] = Vector{Int64}[]
     push!(stages, m)
   end
   return stages
