@@ -60,6 +60,20 @@ function forward_dual(stages; debug=0, normalize=false, solvertol=1e-5, epsilon 
     end
     opt_recover(stage, "dual_fw", "Dual, forward: Failed to solve for $(i)-th stage.\nInitial state $(state0), $(gamma0)")
 
+    # Study Lipschitz constant constraints
+    L = stage.ext[:lip]
+    nx, nscen = size(stage[:π])
+    iteration = stage.ext[:iteration]
+    opt_pis = JuMP.value.(stage[:π])
+    opt_gammas = JuMP.value.(stage[:γ])
+    for j in 1:nscen
+      for ix in 1:nx
+        π_ij = opt_pis[ix,j]
+        if isapprox(π_ij,  L*opt_gammas[j]) || isapprox(π_ij, -L*opt_gammas[j])
+          stage.ext[:info][(iteration, ix, j)] = π_ij
+        end
+      end
+    end
     # Regularize probabilities, so that there's a chance to sample every scenario
     gammas = JuMP.value.(stage.ext[:vars][2])
     gammas_r = gammas .+ ϵ*gamma0
@@ -293,6 +307,9 @@ function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters; verbose=fals
   ubs = Float64[]
   times = Float64[]
   for i = 1:niters
+    for m in pb
+      m.ext[:iteration] = i
+    end
     dt = @elapsed forward_dual(pb; normalize=true, epsilon = epsilon)
     ub = -JuMP.objective_value(pb[1])
     push!(ubs, ub)

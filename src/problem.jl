@@ -123,7 +123,9 @@ function mk_dual_decomp(M::MSLBO, T::Int, dualrisk)
 
     m.ext[:vars] = (π, γ, π0, γ0, λ, ζ, ξ, z)
     m.ext[:prob] = prob
+    m.ext[:lip]  = M.Lip(t, T)
     m.ext[:cuts] = DualCut[]
+    m.ext[:info] = Dict()
 
     push!(stages, m)
   end
