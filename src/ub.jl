@@ -59,10 +59,10 @@ function bellman_convex_ub(stage,xs, xs_next,zs)
   return (ubs)
 end
 
-function convex_ub(stages,traj)
+function convex_ub(pb, traj)
   #TODO : assuming final cost to be 0
     n_traj = length(traj)
-    T = length(stages)
+    T = length(pb)
 
     Ubs = zeros((n_traj,T+1))
 
@@ -70,8 +70,7 @@ function convex_ub(stages,traj)
       #print("  Evaluating at stage $(i): ")
       xs = [traj[l][i] for l in 1:n_traj]
       xs_next = [traj[l][i+1] for l in 1:n_traj]
-      stage = stages[i]
-      Ubs[:,i] = bellman_convex_ub(stage,xs, xs_next,Ubs[:,i+1])
+      Ubs[:,i] = bellman_convex_ub(pb[i], xs, xs_next,Ubs[:,i+1])
       #println()
     end
     return Ubs

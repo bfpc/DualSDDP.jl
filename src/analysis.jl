@@ -110,7 +110,7 @@ function norm1_evolution(vf_info, x1s, x2s)
   return sum(z, dims=(1,2))[1,1,:]
 end
 
-function norm1_evolution(pb::Vector{Model}, x1s, x2s)
+function norm1_evolution(pb::MSSP, x1s, x2s)
   zs = Vector{Float64}[]
   for stage in pb[1:end-1]
     vf_info = pvf_info(stage)
@@ -243,7 +243,7 @@ function norm1_dual_evolution(vf_info, x1s, x2s, ub; γ::Float64=1.0)
   return sum(z, dims=(1,2))[1,1,:]
 end
 
-function norm1_dual_evolution(pb::Vector{Model}, M, nsteps)
+function norm1_dual_evolution(pb::MSSP, M, nsteps)
   zs = Vector{Float64}[]
   nstages = length(pb)
   for k = 1:nstages-1

@@ -15,11 +15,11 @@ function choose(prob; norm=1.0)
 end
 
 "Make a forward primal pass starting from state0"
-function forward(stages, state0; debug=0,return_traj =false)
+function forward(pb, state0; debug=0,return_traj =false)
   traj = [state0]
   branches = Int64[]
 
-  for (i,stage) in enumerate(stages)
+  for (i,stage) in enumerate(pb)
     set_initial_state!(stage, state0)
     opt_recover(stage, "primal_fw", "Primal, forward: Failed to solve for $(i)-th stage.\nInitial state $(state0)")
 
@@ -35,15 +35,15 @@ function forward(stages, state0; debug=0,return_traj =false)
     end
   end
 
-  push!(stages.ext[:trajs], traj)
-  push!(stages.ext[:branches], branches)
+  push!(pb.ext[:trajs], traj)
+  push!(pb.ext[:branches], branches)
   return_traj && return traj
 end
 
 
 "Modify objective function of first dual stage to account for initial state decision"
-function init_dual(stages, x0)
-  m1 = stages[1]
+function init_dual(pb, x0)
+  m1 = pb[1]
   o1 = JuMP.objective_function(m1)
   JuMP.set_objective_function(m1, o1 - m1[:π0]'*x0)
 end
@@ -71,13 +71,13 @@ end
 with positive probability
 if `normalize`, we set `γ=1` (and `π` accordingly) if `γ > solvertol`.
 """
-function forward_dual(stages; debug=0, normalize=false, solvertol=1e-5, ϵ = 1e-2)
+function forward_dual(pb; debug=0, normalize=false, solvertol=1e-5, ϵ = 1e-2)
   traj = DualState[]
   branches = Int64[]
 
   gamma0 = 1.0
   state0 = Float64[]
-  for (i,stage) in enumerate(stages)
+  for (i,stage) in enumerate(pb)
     if i > 1
       set_initial_state!(stage, state0, gamma0)
     end
@@ -124,8 +124,8 @@ function forward_dual(stages; debug=0, normalize=false, solvertol=1e-5, ϵ = 1e-
   if gamma0 == 0
     println("Finished at γ = 0")
   end
-  push!(stages.ext[:trajs], traj)
-  push!(stages.ext[:branches], branches)
+  push!(pb.ext[:trajs], traj)
+  push!(pb.ext[:branches], branches)
 end
 
 """ Add a primal cut
@@ -195,16 +195,16 @@ function add_cut_dual!(stage, next)
 end
 
 """ Perform a primal backward pass """
-function backward(stages)
-  for i in 1:(length(stages)-1)
-    add_cut!(stages[i], stages[i+1])
+function backward(pb)
+  for i in 1:(length(pb)-1)
+    add_cut!(pb[i], pb[i+1])
   end
 end
 
 """ Perform a dual backward pass """
-function backward_dual(stages)
-  for i in 1:(length(stages)-1)
-    add_cut_dual!(stages[i], stages[i+1])
+function backward_dual(pb)
+  for i in 1:(length(pb)-1)
+    add_cut_dual!(pb[i], pb[i+1])
   end
 end
 
@@ -261,11 +261,11 @@ function primalub(M, nstages, risk,solver, trajs,niters::Int;verbose=false)
   println("******************************************")
   println(" PRIMAL Upper Bounds at $niters iterations")
   println("******************************************")
-  stages = mk_primal_decomp(M, nstages, risk)
-  for m in stages
+  pb = mk_primal_decomp(M, nstages, risk)
+  for m in pb
     JuMP.set_optimizer(m, solver)
   end
-  Ubs = convex_ub(stages, trajs)
+  Ubs = convex_ub(pb, trajs)
   if verbose
     println("Recursive upper bounds on $niters trajectories")
     display(Ubs)
@@ -288,11 +288,11 @@ function primalub(M, nstages, risk,solver,trajs,niters;verbose = false)
   times = Float64[]
   for n in niters
     dt = @elapsed begin
-    stages = mk_primal_decomp(M, nstages, risk)
-    for m in stages
+    pb = mk_primal_decomp(M, nstages, risk)
+    for m in pb
       JuMP.set_optimizer(m, solver)
     end
-    Ubs = convex_ub(stages, trajs[1:n])
+    Ubs = convex_ub(pb, trajs[1:n])
     end
     verbose && println("Iteration $n: (Philpott) UB = $(Ubs[1,1])")
     push!(ub,(n,Ubs[1,1]))

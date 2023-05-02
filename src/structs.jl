@@ -34,3 +34,15 @@ struct DualCut
   π0      :: Vector{Float64}
   γ0      :: Float64
 end
+
+# Multi-stage stochastic problems, with some memory in .ext
+struct MSSP <: AbstractArray{Model, 1}
+  stages::Vector{Model}
+  ext::Dict
+end
+
+MSSP(stages::Vector{Model}) = MSSP(stages, Dict())
+
+Base.size(pb::MSSP) = Base.size(pb.stages)
+Base.IndexStyle(::Type{<:MSSP}) = IndexLinear()
+Base.getindex(pb::MSSP, i::Int) = pb.stages[i]
