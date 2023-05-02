@@ -83,15 +83,11 @@ function mk_dual_decomp(M::MSLBO, T::Int, dualrisk)
 
     λ = @variable(m, λ[i=1:nd,j=1:n])
     π = @variable(m, π[i=1:nx,j=1:n])
-    γ = @variable(m, γ[j=1:n])
-    ζ = @variable(m, ζ[i=1:nx])
-    ξ = @variable(m, ξ[i=1:ny,j=1:n])
+    γ = @variable(m, γ[j=1:n] >= 0)
+    ζ = @variable(m, ζ[i=1:nx] >= 0)
+    ξ = @variable(m, ξ[i=1:ny,j=1:n] >= 0)
     π0 = @variable(m, π0[i=1:nx])
     γ0 = @variable(m, γ0)
-
-    set_lower_bound.(γ,0)
-    set_lower_bound.(ζ,0)
-    set_lower_bound.(ξ,0)
 
     # Box constraints for π, using (primal) Lipschitz constant
     L = M.Lip(t, T)
