@@ -46,3 +46,29 @@ In so doing, it will also require that the `Gurobi` package is installed,
 which was used for some of the examples.
 If that is not desired, one can remove it from the `Packages.toml` file,
 or simply issue `pkg> rm Gurobi`.
+
+## Running from the command line
+
+The one-shot examples can be invoked, for example, by
+`examples/1d_toy $ julia example.jl`.
+
+The `Config.jl` examples were designed to run several cases in sequence,
+likely on a remote server.
+A sample command line invocation is
+`examples $ julia batch.jl config_1d.json`
+
+## Running from the REPL
+
+For the one-shot examples, simply `cd` into their directory and include
+the corresponding `example.jl` file:
+
+```julia
+shell> cd examples/1d_toy/
+julia> include("example.jl")
+```
+
+
+For the `Config.jl` examples, set `ARGS[1]` to the desired configuration
+file, and then run `include("batch.jl")`.
+This will produce output files in `data/output/$(save_path)`, which can be
+further processed using the `graph*.jl` scripts.
