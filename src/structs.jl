@@ -3,10 +3,11 @@ State = Vector{Float64}
 DualState = Tuple{Float64, Vector{Float64}}
 
 # Multi-Stage Linear Bellman Operator
-#   A,B,T,c,d are functions of (time, branch)
-#   Ux, Uy are functions of time
-#   lb, ub, Lip are functions of (time, Horizon)
-#   prob is a function of time
+#   A,B,T,c,d are functions of (stage, branch)
+#   Ux, Uy are functions of stage
+#   lb, ub, Lip are functions of (stage, Horizon)
+#   prob is a function of stage
+# The notation for stage is "t", because usually it indicates time.
 struct MSLBO
   A :: Function # Ax_t + Bx_{t-1} + Ty = d
   B :: Function
@@ -15,7 +16,7 @@ struct MSLBO
   d :: Function
   Ux :: Function # upper bound on the positive state x
   Uy :: Function # upper bound on the positive control y
-  lb :: Function # lower bound at each stage
+  lb :: Function # lower bound for the value function at each stage
   ub :: Function # upper bound on the value of the problem
   Lip :: Function # upper bound on the Lipschitz constant
   prob :: Function # reference probability over branches
