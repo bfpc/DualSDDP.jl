@@ -14,7 +14,7 @@ function smallmultiples(bounds_dict; log::Bool=false)
   nbetas = length(betas)
   interact = plt.isinteractive()
   plt.ioff()
-  fig, axs = plt.subplots(ncols=nalphas, nrows=nbetas, figsize=(14,14); sharey=true, squeeze=false)
+  fig, axs = plt.subplots(ncols=nalphas, nrows=nbetas, figsize=(9 ,12); sharey=true, squeeze=false)
   for i in 1:nalphas
     alpha = alphas[i]
     for j in 1:nbetas
@@ -23,15 +23,15 @@ function smallmultiples(bounds_dict; log::Bool=false)
       for lip in lips
         axs[i,j].plot(bounds_dict[(alpha, beta, lip)][2], label=string(lip))
       end
-      axs[i,j].axhline(lb, linestyle="--", linewidth=1, color="b")
+      axs[i,j].axhline(lb, linestyle="--", linewidth=1, color="b", label="Best LB")
       axs[i,j].set_title("α = $alpha, β = $beta")
       if log
         axs[i,j].set_yscale("log")
       end
     end
   end
-  axs[1,end].legend(title="Lipschitz parameter")
-  fig.suptitle("Bounds for varying Lipschitz constants")
+  axs[1,end].legend(title="Lipschitz multiplier")
+  fig.suptitle("Upper bounds for different Lipschitz constants")
   fig.tight_layout()
   if interact
     plt.ion()
