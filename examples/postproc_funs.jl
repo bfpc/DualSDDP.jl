@@ -149,3 +149,44 @@ function table_relgaps(bounds_dict, param_name, ts)
   end
 end
 
+function latex_relgaps(bounds_dict, param_name, ts)
+  alphas, betas, params = sets_in_dict(bounds_dict)
+
+  nalphas = length(alphas)
+  nbetas = length(betas)
+  print("\\begin{tabular}{cc|")
+  for t in ts
+    print("c")
+  end
+  println("|}")
+  @printf(" %16s & %4s & \\multicolumn{%d}{c|}{Relative gap at iteration} \\\n", "", "", length(ts))
+  @printf(" %16s & %4s ", "\$(\\alpha,\\beta)\$", param_name)
+  for t in ts
+          @printf("& %8d ", t)
+  end
+  println("\\\\ \\hline")
+  for i in 1:nalphas
+    alpha = alphas[i]
+    for j in 1:nbetas
+      beta = betas[j]
+      lb = best_lb(bounds_dict, alpha, beta, params)
+      for p in params
+        if p == params[1]
+          @printf(" \\multirow{ %d}{*}{(%4.2f, %4.2f)}\n", length(params), alpha, beta)
+        end
+        @printf(" & %4d ", p)
+        for t in ts
+          gap = bounds_dict[(alpha, beta, p)][2][t]/lb - 1
+          @printf("& %8.2f ", 100*gap)
+        end
+        if p == params[end]
+          @printf("\\\\ \\hline\n")
+        else
+          println("\\\\")
+        end
+      end
+    end
+  end
+  println("\\end{tabular}")
+end
+
