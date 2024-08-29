@@ -3,6 +3,7 @@ Pkg.activate("../")
 
 using Random: seed!
 using DualSDDP
+using ..Build
 
 lip_factor = 100
 
