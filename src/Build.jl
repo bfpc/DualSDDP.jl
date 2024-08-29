@@ -10,13 +10,13 @@ Parameters:
 - `B::Vector{Matrix{Float64}}`: B matrix at each stage
 - `T::Vector{Matrix{Float64}}`: T matrix at each stage
 - `c::Vector{Vector{Float64}}`: marginal cost of y_t at each stage
-- `d::Vector{Vector{Float64}}`: demmand (d) at each stage
-- `Ux::Vector{Float64}`: Upper bound on the positive state x (same for all stages)
-- `Uy::Vector{Float64}`: Upper bound on the positive control y (same for all stages)
-- `lb::Float64`: Lower bound
+- `d::Vector{Float64}`: d vector
+- `Ux::Vector{Vector{Float64}}`: Upper bound on the positive state x at each stage
+- `Uy::Vector{Vector{Float64}}`: Upper bound on the positive control y at each stage
+- `lb::Float64`: Lower bound on the value of the problem
 - `ub::Float64`: Upper bound on the value of the problem
 - `Lip::Float64`: Upper bound on the Lipschitz constant
-- `prob::Vector{Float64}`: reference probability over branches (Fix!!!)
+- `prob::Vector{Vector{Float64}}`: reference probability over branches
 - `n_stages::Int=4`: number of stages for testing before running the algorithm
 
 Returns:
@@ -27,13 +27,13 @@ function build(A::Vector{Matrix{Float64}},
                 B::Vector{Matrix{Float64}},
                 T::Vector{Matrix{Float64}},
                 c::Vector{Vector{Float64}},
-                d::Vector{Vector{Float64}},
-                Ux::Vector{Float64},
-                Uy::Vector{Float64},
+                d::Vector{Float64},
+                Ux::Vector{Vector{Float64}},
+                Uy::Vector{Vector{Float64}},
                 lb::Float64,
                 ub::Float64,
                 Lip::Float64,
-                prob::Vector{Float64},
+                prob::Vector{Vector{Float64}},
                 n_stages::Int=4)
   """
   Returns the A matrix at stage t,
@@ -96,7 +96,7 @@ function build(A::Vector{Matrix{Float64}},
   end
 
   """
-  Returns the d vector at stage t,
+  Returns the d vector,
   Corresponds to the vector of demmand (d) in the equation Ax_t + Bx_{t-1} + Ty = d
 
   Parameters:
@@ -104,38 +104,36 @@ function build(A::Vector{Matrix{Float64}},
   - `i::Int`: branch
 
   Returns:
-  - `d::Vector{Float64}`: d vector at stage t
+  - `d::Vector{Float64}`: d vector
   """
   function d_func(t::Int, i::Int)
-    return d[t]
+    return d
   end
 
   """
-  Returns the Upper bound on the positive state x
-  Observations:
-  It convert the scalar Ux to a vector of size 1 for access in the MSLBO
+  Returns the Upper bound on the positive state x at stage t
   
   Parameters:
   - `t::Int`: stage
 
   Returns:
-  - `Ux::Vector{Float64}`: Upper bound on the positive state x
+  - `Ux::Vector{Float64}`: Upper bound on the positive state x at stage t
   """
   function Ux_func(t::Int)
-    return Ux
+    return Ux[t]
   end
 
   """
-  Returns the Upper bound on the positive control y
+  Returns the Upper bound on the positive control y at stage t
 
   Parameters:
   - `t::Int`: stage
 
   Returns:
-  - `Uy::Vector{Float64}`: Upper bound on the positive control y
+  - `Uy::Vector{Float64}`: Upper bound on the positive control y at stage t
   """
   function Uy_func(t::Int)
-    return Uy
+    return Uy[t]
   end
 
   """
@@ -187,14 +185,10 @@ function build(A::Vector{Matrix{Float64}},
   - `prob::Vector{Float64}`: reference probability over branches
   """
   function prob_func(t::Int)
-    if t == 1
-      return prob
-    else
-      return ones(Main.nscen)/Main.nscen
-    end
+    prob[t]
   end
 
-  for (matrix, name) in zip([A, B, T,c ,d], ["A", "B", "T", "c", "d"])
+  for (matrix, name) in zip([A, B, T, c], ["A", "B", "T", "c"])
     if size(matrix, 1) != n_stages
       error("The number of stages ($n_stages) must be equal to the number of $name, $(size(matrix, 1)) were given")
     end
@@ -213,12 +207,8 @@ Fields:
 - `B::Matrix{Float64}`: B matrix at the stage
 - `T::Matrix{Float64}`: T matrix at the stage
 - `c::Vector{Float64}`: marginal cost of y_t at the stage
-- `d::Vector{Float64}`: demmand (d) at the stage
-- `Ux::Float64`: Upper bound on the positive state x
-- `Uy::Float64`: Upper bound on the positive control y
-- `lb::Float64`: Lower bound
-- `ub::Float64`: Upper bound on the value of the problem
-- `Lip::Float64`: Upper bound on the Lipschitz constant
+- `Ux::Float64`: Upper bound on the positive state x at the stage
+- `Uy::Float64`: Upper bound on the positive control y at the stage
 - `prob::Vector{Float64}`: reference probability over branches
 """
 struct StageMLSBO
@@ -226,12 +216,8 @@ struct StageMLSBO
     B::Matrix{Float64}
     T::Matrix{Float64}
     c::Vector{Float64}
-    d::Vector{Float64}
-    Ux::Float64
-    Uy::Float64
-    lb::Float64
-    ub::Float64
-    Lip::Float64
+    Ux::Vector{Float64}
+    Uy::Vector{Float64}
     prob::Vector{Float64}
 end
 
@@ -240,23 +226,24 @@ Build the MSLBO struct for the hydro problem by passing each stage as a struct
 
 Parameters:
 - `stages::Vector{StageMLSBO}`: Vector of stages for the MSLBO problem
+- `d::Vector{Float64}`: d vector
+- `lb::Float64`: Lower bound on the value of the problem
+- `ub::Float64`: Upper bound on the value of the problem
+- `Lip::Float64`: Upper bound on the Lipschitz constant
 
 Returns:
 - `MSLBO`: MSLBO struct for the hydro problem, with the functions defined by
  the parameters on the builder
 """
-function build(stages::Vector{StageMLSBO})
+function build(stages::Vector{StageMLSBO}, d::Vector{Float64}, lb::Float64,
+                               ub::Float64, Lip::Float64)
   A = [stage.A for stage in stages]
   B = [stage.B for stage in stages]
   T = [stage.T for stage in stages]
   c = [stage.c for stage in stages]
-  d = [stage.d for stage in stages]
-  Ux = stages[1].Ux
-  Uy = stages[1].Uy
-  lb = stages[1].lb
-  ub = stages[1].ub
-  Lip = stages[1].Lip
-  prob = stages[1].prob
+  Ux = [stage.Ux for stage in stages]
+  Uy = [stage.Uy for stage in stages]
+  prob = [stage.prob for stage in stages]
   return build(A, B, T, c, d, Ux, Uy, lb, ub, Lip, prob, length(stages))
 end
   

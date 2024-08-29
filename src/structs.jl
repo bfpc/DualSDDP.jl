@@ -35,6 +35,26 @@ struct DualCut
   γ0      :: Float64
 end
 
+"""
+Struct to hold one stage of the MSLBO problem
+
+Fields:
+- `A::Matrix{Float64}`: A matrix at the stage
+- `B::Matrix{Float64}`: B matrix at the stage
+- `T::Matrix{Float64}`: T matrix at the stage
+- `c::Vector{Float64}`: marginal cost of y_t at the stage
+- `Ux::Float64`: Upper bound on the positive state x at the stage
+- `Uy::Float64`: Upper bound on the positive control y at the stage
+"""
+struct StageMLSBO
+    A::Matrix{Float64}
+    B::Matrix{Float64}
+    T::Matrix{Float64}
+    c::Vector{Float64}
+    Ux::Vector{Float64}
+    Uy::Vector{Float64}
+end
+
 # Multi-stage stochastic problems, with some memory in .ext
 struct MSSP <: AbstractArray{Model, 1}
   stages::Vector{Model}
