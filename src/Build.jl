@@ -15,7 +15,7 @@ Parameters:
 - `Uy::Vector{Float64}`: Upper bound on the positive control y
 - `lb::Vector{Float64}`: Lower bound on the value of the problem at each stage
 - `ub::Vector{Float64}`: Upper bound on the value of the problem at each stage
-- `Lip::Float64`: Upper bound on the Lipschitz constant
+- `Lip::Vector{Float64}`: Upper bound on the Lipschitz constant at each stage
 - `prob::Vector{Vector{Float64}}`: reference probability at each stage over branches
 - `n_stages::Int=4`: number of stages for testing before running the algorithm
 
@@ -32,7 +32,7 @@ function build(A::Vector{Matrix{Float64}},
                 Uy::Vector{Float64},
                 lb::Vector{Float64},
                 ub::Vector{Float64},
-                Lip::Float64,
+                Lip::Vector{Float64},
                 prob::Vector{Vector{Float64}},
                 n_stages::Int=4)
   """
@@ -169,10 +169,10 @@ function build(A::Vector{Matrix{Float64}},
   - `t::Int`: stage
 
   Returns:
-  - `Lip::Float64`: Upper bound on the Lipschitz constant
+  - `Lip::Float64`: Upper bound on the Lipschitz constant at stage t
   """
   function Lip_func(t::Int, nstages::Int)
-    return Lip
+    return Lip[t]
   end
 
   """
@@ -210,6 +210,7 @@ Fields:
 - `d::Vector{Vector{Float64}}`: d vector at the stage (demand) over branches
 - `lb::Float64`: Lower bound on the value of the problem at the stage
 - `ub::Float64`: Upper bound on the value of the problem at the stage
+- `Lip::Float64`: Upper bound on the Lipschitz constant
 - `prob::Vector{Float64}`: reference probability over branches
 """
 struct StageMLSBO
@@ -220,6 +221,7 @@ struct StageMLSBO
     d::Vector{Vector{Float64}}
     lb::Float64
     ub::Float64
+    Lip::Float64
     prob::Vector{Float64}
 end
 
@@ -236,8 +238,7 @@ Returns:
 - `MSLBO`: MSLBO struct for the hydro problem, with the functions defined by
  the parameters on the builder
 """
-function build(stages::Vector{StageMLSBO}, Ux::Vector{Float64},
-                       Uy::Vector{Float64}, Lip::Float64)
+function build(stages::Vector{StageMLSBO}, Ux::Vector{Float64}, Uy::Vector{Float64})
   A = [stage.A for stage in stages]
   B = [stage.B for stage in stages]
   T = [stage.T for stage in stages]
@@ -245,6 +246,7 @@ function build(stages::Vector{StageMLSBO}, Ux::Vector{Float64},
   d = [stage.d for stage in stages]
   lb = [stage.lb for stage in stages]
   ub = [stage.ub for stage in stages]
+  Lip = [stage.Lip for stage in stages]
   prob = [stage.prob for stage in stages]
   return build(A, B, T, c, d, Ux, Uy, lb, ub, Lip, prob, length(stages))
 end

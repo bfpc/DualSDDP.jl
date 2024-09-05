@@ -30,16 +30,16 @@ Uy = [60.0, 200, 15, 15, 75]
 
 lb = fill(0.0, 4)
 ub = fill(75*50, 4)
-Lip = 50.0
+Lip = fill(50.0, 4)
 prob = [[0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5]]
 
 #M = build(A, B, T, c, d, Ux, Uy, lb, ub, Lip, prob, 4)
 
 stages = Vector{StageMLSBO}(undef, 4)
 for t in 1:4
-  stages[t] = StageMLSBO(A[t], B[t], T[t], c[t], d[t], lb[t], ub[t], prob[t])
+  stages[t] = StageMLSBO(A[t], B[t], T[t], c[t], d[t], lb[t], ub[t], Lip[t], prob[t])
 end
 
-M = build(stages, Ux, Uy, Lip)
+M = build(stages, Ux, Uy)
 
 end
