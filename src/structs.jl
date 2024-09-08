@@ -9,7 +9,7 @@ DualState = Tuple{Float64, Vector{Float64}}
 #   prob is a function of stage
 # The notation for stage is "t", because usually it indicates time.
 struct MSLBO
-  A :: Function # Ax_t + Bx_{t-1} + Ty = d
+  A :: Function # Ax_t + Bx_{t-1} + Ty_t = d
   B :: Function
   T :: Function
   c :: Function # marginal cost of y_t
