@@ -5,6 +5,7 @@ using JuMP: Model, @variable, @constraint, @objective,
             set_lower_bound, set_upper_bound, fix, set_normalized_coefficient
 
 include("structs.jl")
+include("build.jl")
 include("problem.jl")
 include("risk_models.jl")
 include("algo.jl")
