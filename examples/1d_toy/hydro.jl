@@ -20,7 +20,7 @@ function T(t::Int, i::Int)
 end
 
 function c(t::Int, i::Int)
-  return [0, 1, 5, 10, 50]
+  return [0., 1, 5, 10, 50]
 end
 
 function d(t::Int, i::Int)
@@ -32,10 +32,10 @@ function d(t::Int, i::Int)
 end
 
 function Ux(t::Int)
-  return [100]
+  return [100.0]
 end
 function Uy(t::Int)
-  return [60, 200, 15, 15, 75]
+  return [60.0, 200, 15, 15, 75]
 end
 
 function lb(t::Int, nstages::Int)
