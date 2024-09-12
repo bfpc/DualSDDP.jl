@@ -45,7 +45,7 @@ and finally resolve all packages.
 In so doing, it will also require that the `Gurobi` package is installed,
 which was used for some of the examples.
 If that is not desired, one can remove it from the `Packages.toml` file,
-or simply issue `pkg> rm Gurobi`.
+or simply issue `pkg> rm Gurobi` before `dev ..`.
 
 ## Running from the command line
 
