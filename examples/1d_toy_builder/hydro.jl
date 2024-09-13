@@ -28,9 +28,9 @@ prob = [[1.0], ones(nscen)/nscen, ones(nscen)/nscen, ones(nscen)/nscen]
 
 stages = Vector{SimpleLBO}(undef, 4)
 for t in 1:4
-  stages[t] = SimpleLBO(A, B, T, c, d[t], lb[t], ub[t], Lip[t], prob[t])
+  stages[t] = SimpleLBO(A, B, T, c, d[t], Ux, Uy, lb[t], ub[t], Lip[t], prob[t])
 end
 
-M = build(stages, Ux, Uy)
+M = build(stages)
 
 end
