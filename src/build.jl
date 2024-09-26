@@ -19,8 +19,8 @@ Parameters:
 - `T::Vector{Matrix{Float64}}`: T matrix at each stage
 - `c::Vector{Vector{Float64}}`: marginal cost of y_t at each stage
 - `d::Vector{Vector{Vector{Float64}}}`: d vector at each stage and branch j
-- `Ux::Vector{Float64}`: Upper bound on the positive state x
-- `Uy::Vector{Float64}`: Upper bound on the positive control y
+- `Ux::Vector{Vector{Float64}}`: Upper bound on the positive state x at each stage
+- `Uy::Vector{Vector{Float64}}`: Upper bound on the positive control y at each stage
 - `lb::Vector{Float64}`: Lower bound on the value of the problem at each stage
 - `ub::Vector{Float64}`: Upper bound on the value of the problem at each stage
 - `Lip::Vector{Float64}`: Upper bound on the Lipschitz constant at each stage
@@ -83,8 +83,8 @@ function build(A::Vector{Matrix{Float64}},
     prob[t]
   end
 
-  vectors = [A, B, T, c, d, lb, ub, Lip, prob]
-  names = ["A", "B", "T", "c", "d", "lb", "ub", "Lip", "prob"]
+  vectors = [A, B, T, c, d, Ux, Uy, lb, ub, Lip, prob]
+  names = ["A", "B", "T", "c", "d", "Ux", "Uy", "lb", "ub", "Lip", "prob"]
   for (vector, name) in zip(vectors, names)
     if length(vector) != n_stages
       error("The number of stages ($n_stages) must be equal to the number of entries in $name; $(length(vector)) were given.")
