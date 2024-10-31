@@ -15,7 +15,7 @@ function bellman_convex_ub(stage,xs, xs_next,zs)
   # stage should be the optimization problem without any cut
   # xs is a collection of points in the current step at which the new upper bound is computed
   # xs_next is a collection of states at next step
-  # zs is the associated upper value at xs
+  # zs is the associated upper value at xs_next
 
   z = stage.ext[:vars][5] # value next stage
   x = stage.ext[:vars][1]
