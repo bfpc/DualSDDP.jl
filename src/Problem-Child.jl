@@ -283,6 +283,14 @@ function compute_vertex(stage::IO_stage, next_stage::IO_stage,next_state, solver
     return v
 end
 
+""" Calculate  ρ(Z) """
+function compute_risk(values::Array, probabilities::Array, risk, solver)
+    m = Model(solver)
+    risk(m, values, probabilities)
+    JuMP.optimize!(m)
+    return JuMP.objective_value(m)
+end
+
 """ Add the same vertices in every inner model (one per branch) """
 function add_vertex!(stage::IO_stage, vertex::Vertex)
     for m in stage.inner
@@ -380,22 +388,31 @@ function problem_child_solve(M, nstages, risk, solver, state0, niters;verbose=fa
     for i = 1:niters
         dt = @elapsed traj = forward(pb, state0)
         push!(trajs, traj)
-         #TODO missing first stage risk measure
-        lb = JuMP.objective_value(pb[1].outer[1])
+        # Calculate LowerBound from first-stage outer optimal values
+        first_stage = pb[1]
+        values = [JuMP.objective_value(sp) for sp in first_stage.outer]
+        lb = compute_risk(values, first_stage.prob, first_stage.risk, solver)
         push!(lbs, lb)
         if verbose && (i % nprint == 0)
             print("Iteration $i: LB = ", lb)
         end
+
+        # Add cuts/vertices to inner/outer approximations at the states
+        # in the forward trajectory
         dt += @elapsed update_approximations(pb,trajs[end],solver)
 
-        m = pb[1].inner[1]
-        set_initial_state!(m,state0)
-        dt += @elapsed opt_recover(m, "problem_child_1_st", "Primal, Upperbound: Failed to solve initial problem")
-        p_ub = JuMP.objective_value(m)
+        # Calculate UpperBound from first-stage inner optimal values
+        values = Float64[]
+        for m in first_stage.inner
+            set_initial_state!(m, state0)
+            dt += @elapsed opt_recover(m, "problem_child_1_st", "Primal, upper bound: Failed to solve initial problem")
+            push!(values, JuMP.objective_value(m))
+        end
+        p_ub = compute_risk(values, first_stage.prob, first_stage.risk, solver)
+        push!(p_ubs,p_ub)
         if verbose && (i % nprint == 0)
             println(" P-UB = ", p_ub)
         end
-        push!(p_ubs,p_ub)
         push!(times,dt)
     end
     if verbose
