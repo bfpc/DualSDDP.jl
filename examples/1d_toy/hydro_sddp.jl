@@ -3,6 +3,9 @@ using JuMP: @variable, @constraint
 using SDDP: State, @stageobjective
 
 include("hydro_conf.jl")
+include("hydro_scen.jl")
+
+inivol = 83.222
 
 function build_hydro(sp, t)
   @variable(sp, 0 <= vol <= 100, State, initial_value=inivol)
@@ -35,7 +38,8 @@ pb = SDDP.LinearPolicyGraph(build_hydro;
                             optimizer = solver,
                             lower_bound = 0.0);
 
-SDDP.train(pb, iteration_limit=niters, risk_measure=SDDP.AVaR(beta))
+rm = SDDP.AVaR(alpha)
+SDDP.train(pb, iteration_limit=niters, risk_measure=rm)
 
 using Statistics: mean, std
 
