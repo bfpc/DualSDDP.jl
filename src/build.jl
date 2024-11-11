@@ -10,8 +10,7 @@ Build the MSLBO struct by passing vectors of matrices.
 
   This interface is less general than the Functional form in the struct MSLBO,
   but can be easier to use in simple problems.
-  In particular, it only deals with uncertainties in the RHS of the constraints,
-  and the bounds on the state and control are constant over time.
+  In particular, it only deals with uncertainties in the RHS of the constraints.
 
 Parameters:
 - `A::Vector{Matrix{Float64}}`: A matrix at each stage
@@ -19,8 +18,8 @@ Parameters:
 - `T::Vector{Matrix{Float64}}`: T matrix at each stage
 - `c::Vector{Vector{Float64}}`: marginal cost of y_t at each stage
 - `d::Vector{Vector{Vector{Float64}}}`: d vector at each stage and branch j
-- `Ux::Vector{Float64}`: Upper bound on the positive state x
-- `Uy::Vector{Float64}`: Upper bound on the positive control y
+- `Ux::Vector{Vector{Float64}}`: Upper bound on the positive state x at each stage
+- `Uy::Vector{Vector{Float64}}`: Upper bound on the positive control y at each stage
 - `lb::Vector{Float64}`: Lower bound on the value of the problem at each stage
 - `ub::Vector{Float64}`: Upper bound on the value of the problem at each stage
 - `Lip::Vector{Float64}`: Upper bound on the Lipschitz constant at each stage
