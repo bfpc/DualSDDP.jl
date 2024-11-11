@@ -249,9 +249,14 @@ end
 Update inner and outer approximation along a given trajectories 
 (e.g. computed by forward) 
 """
-function update_approximations(stages::Vector{IO_stage},traj,solver)
+function update_approximations(stages::Vector{IO_stage},traj,solver; backward_solve=true)
     T = length(stages)
-    for t in 1:T-1
+    if backward_solve
+        stage_list = T-1:-1:1
+    else
+        stage_list = 1:T-1
+    end
+    for t in stage_list
         next_state = traj[t+1]
         c = compute_cut(stages[t],stages[t+1],next_state,solver)
         add_cut!(stages[t], c)
@@ -366,7 +371,7 @@ solver is a linear solver
 state0 is the initaial state 
 niters is the number of iterations ran before stopping
 """
-function problem_child_solve(M, nstages, risk, solver, state0, niters;verbose=false, nprint=10)
+function problem_child_solve(M, nstages, risk, solver, state0, niters;verbose=false, nprint=10, backward_solve=true)
     pb = mk_primal_io(M, nstages, risk)
     for stage in pb
         for m in stage.inner
@@ -399,7 +404,7 @@ function problem_child_solve(M, nstages, risk, solver, state0, niters;verbose=fa
 
         # Add cuts/vertices to inner/outer approximations at the states
         # in the forward trajectory
-        dt += @elapsed update_approximations(pb,trajs[end],solver)
+        dt += @elapsed update_approximations(pb,trajs[end],solver; backward_solve)
 
         # Calculate UpperBound from first-stage inner optimal values
         values = Float64[]

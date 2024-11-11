@@ -194,16 +194,32 @@ function add_cut_dual!(stage, next)
   push!(stage.ext[:cuts], DualCut(cst, mul_π, mul_γ, π0, γ0))
 end
 
-""" Perform a primal backward pass """
-function backward(pb)
+""" Update primal value functions in forward fashion """
+function update_vf(pb)
   for i in 1:(length(pb)-1)
     add_cut!(pb[i], pb[i+1])
   end
 end
 
-""" Perform a dual backward pass """
-function backward_dual(pb)
+""" Perform a primal backward pass, re-solving problems with new cuts """
+function backward(pb)
+  for i in (length(pb)-1):-1:1
+    opt_recover(pb[i+1], "primal_bw", "Primal, backward: Failed to solve for $(i+1)-th stage.")
+    add_cut!(pb[i], pb[i+1])
+  end
+end
+
+""" Update dual value functions in forward fashion """
+function update_vf_dual(pb)
   for i in 1:(length(pb)-1)
+    add_cut_dual!(pb[i], pb[i+1])
+  end
+end
+
+""" Perform a dual backward pass, re-solving problems with new cuts """
+function backward_dual(pb)
+  for i in (length(pb)-1):-1:1
+    opt_recover(pb[i+1], "dual_bw", "Dual, backward: Failed to solve for $(i+1)-th stage.")
     add_cut_dual!(pb[i], pb[i+1])
   end
 end
@@ -219,7 +235,7 @@ niters is the number of iterations ran before stopping
 
 """
 function primalsolve(M::MSLBO, nstages, risk, solver, state0, niters;
-                     verbose=false, nprint=10)
+                     verbose=false, nprint=10, backward_solve=true)
   pb = mk_primal_decomp(M, nstages, risk)
   for m in pb
     JuMP.set_optimizer(m, solver)
@@ -240,7 +256,11 @@ function primalsolve(M::MSLBO, nstages, risk, solver, state0, niters;
     if verbose && (i % nprint == 0)
       println("Iteration $i: LB = ", lb)
     end
-    dt += @elapsed backward(pb)
+    if backward_solve
+      dt += @elapsed backward(pb)
+    else
+      dt += @elapsed update_vf(pb)
+    end
     push!(times, dt)
   end
   if verbose
@@ -312,7 +332,8 @@ risk is a function building the risk measure
 state0 is the initial state
 niters is the number of iterations ran before stopping
 """
-function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters; verbose=false, nprint=10, ϵ = 1e-2)
+function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters;
+                   verbose=false, nprint=10, backward_solve=true, ϵ = 1e-2)
   pb = mk_dual_decomp(M, nstages, risk)
   for m in pb
     JuMP.set_optimizer(m, solver)
@@ -333,7 +354,11 @@ function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters; verbose=fals
     if verbose && (i % nprint == 0)
       println("Iteration $i: D-UB = ", ub)
     end
-    dt += @elapsed backward_dual(pb)
+    if backward_solve
+      dt += @elapsed backward_dual(pb)
+    else
+      dt += @elapsed update_vf_dual(pb)
+    end
     push!(times, dt)
   end
   if verbose
