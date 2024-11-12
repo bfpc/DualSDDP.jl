@@ -1,4 +1,4 @@
-function mk_primal_avar(alpha; beta=1.0)
+function mk_primal_avar(alpha; beta=0.0)
   function primal_avar(m, t, ps)
     n = length(t)
     # RU representation: extra variables, constraints and objective function
@@ -14,7 +14,7 @@ function mk_primal_avar(alpha; beta=1.0)
   end
 end
 
-function mk_copersp_avar(alpha; beta=1.0)
+function mk_copersp_avar(alpha; beta=0.0)
   function copersp_avar(m, gamma, ps, gamma_in)
     @constraint(m, _z_ru, sum(gamma) == gamma_in)
     @constraint(m, gamma_in*beta .* ps .<= gamma)
