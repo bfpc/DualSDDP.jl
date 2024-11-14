@@ -194,32 +194,40 @@ function add_cut_dual!(stage, next)
   push!(stage.ext[:cuts], DualCut(cst, mul_π, mul_γ, π0, γ0))
 end
 
-""" Update primal value functions in forward fashion """
-function update_vf(pb)
-  for i in 1:(length(pb)-1)
+""" Update primal value functions calculating cuts.
+
+If `backward_solve` is disabled, keep forward solutions; otherwise,
+re-solve to pickup cuts from future stages going backwards. """
+function update_vf(pb; backward_solve=true)
+  T = length(pb)
+  if backward_solve
+    stage_list = T-1:-1:-1
+  else
+    stage_list = 1:T-1
+  end
+  for i in stage_list
+    if backward_solve
+      opt_recover(pb[i+1], "primal_bw", "Primal, backward: Failed to solve for $(i+1)-th stage.")
+    end
     add_cut!(pb[i], pb[i+1])
   end
 end
 
-""" Perform a primal backward pass, re-solving problems with new cuts """
-function backward(pb)
-  for i in (length(pb)-1):-1:1
-    opt_recover(pb[i+1], "primal_bw", "Primal, backward: Failed to solve for $(i+1)-th stage.")
-    add_cut!(pb[i], pb[i+1])
-  end
-end
+""" Update dual value functions calculating cuts.
 
-""" Update dual value functions in forward fashion """
+If `backward_solve` is disabled, keep forward solutions; otherwise,
+re-solve to pickup cuts from future stages going backwards. """
 function update_vf_dual(pb)
-  for i in 1:(length(pb)-1)
-    add_cut_dual!(pb[i], pb[i+1])
+  T = length(pb)
+  if backward_solve
+    stage_list = T-1:-1:-1
+  else
+    stage_list = 1:T-1
   end
-end
-
-""" Perform a dual backward pass, re-solving problems with new cuts """
-function backward_dual(pb)
-  for i in (length(pb)-1):-1:1
-    opt_recover(pb[i+1], "dual_bw", "Dual, backward: Failed to solve for $(i+1)-th stage.")
+  for i in stage_list
+    if backward_solve
+      opt_recover(pb[i+1], "dual_bw", "Dual, backward: Failed to solve for $(i+1)-th stage.")
+    end
     add_cut_dual!(pb[i], pb[i+1])
   end
 end
@@ -256,11 +264,7 @@ function primalsolve(M::MSLBO, nstages, risk, solver, state0, niters;
     if verbose && (i % nprint == 0)
       println("Iteration $i: LB = ", lb)
     end
-    if backward_solve
-      dt += @elapsed backward(pb)
-    else
-      dt += @elapsed update_vf(pb)
-    end
+    dt += @elapsed update_vf(pb; backward_solve)
     push!(times, dt)
   end
   if verbose
@@ -354,11 +358,7 @@ function dualsolve(M::MSLBO, nstages, risk, solver, state0, niters;
     if verbose && (i % nprint == 0)
       println("Iteration $i: D-UB = ", ub)
     end
-    if backward_solve
-      dt += @elapsed backward_dual(pb)
-    else
-      dt += @elapsed update_vf_dual(pb)
-    end
+    dt += @elapsed update_vf_dual(pb; backward_solve)
     push!(times, dt)
   end
   if verbose
