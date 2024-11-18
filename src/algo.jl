@@ -201,7 +201,7 @@ re-solve to pickup cuts from future stages going backwards. """
 function update_vf(pb; backward_solve=true)
   T = length(pb)
   if backward_solve
-    stage_list = T-1:-1:-1
+    stage_list = T-1:-1:1
   else
     stage_list = 1:T-1
   end
@@ -217,10 +217,10 @@ end
 
 If `backward_solve` is disabled, keep forward solutions; otherwise,
 re-solve to pickup cuts from future stages going backwards. """
-function update_vf_dual(pb)
+function update_vf_dual(pb; backward_solve=true)
   T = length(pb)
   if backward_solve
-    stage_list = T-1:-1:-1
+    stage_list = T-1:-1:1
   else
     stage_list = 1:T-1
   end
