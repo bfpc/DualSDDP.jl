@@ -44,55 +44,11 @@ function write_cuts_to_file(model::MSSP, filename::String)
     return
 end
 
-"""
-    write_policy_to_file(model::Vector{IO_stage}, filename::String)
-
-Write cuts and verticies that form the policy in `model` to `filename`,
-in JSON format, similar to `SDDP.write_cuts_to_file`.
-"""
-function write_policy_to_file(model::Vector{IO_stage}, filename::String)
-    policy = Dict{String,Any}[]
-    for (i, stage) in enumerate(model)
-        node_info = Dict(
-            "node" => string(i),
-            "single_cuts" => Dict{String,Any}[],
-            "vertices" => Dict{String,Any}[],
-        )
-
-        for cut in stage.cuts
-          push!(node_info["single_cuts"], to_dict(cut))
-        end
-        for vertex in stage.inner_vertices
-          push!(node_info["vertices"], to_dict(vertex))
-        end
-
-        push!(policy, node_info)
-    end
-    open(filename, "w") do io
-        return write(io, JSON.json(policy))
-    end
-    return
-end
-
 function to_dict(cut::PrimalCut)
   Dict(
        "intercept" => cut.value - cut.slope' * cut.x0,
        "coefficients" => Dict(["x$(n)" => slope_n for (n, slope_n) in enumerate(cut.slope)]),
        "state" => Dict(["x$(n)" => state_n for (n, state_n) in enumerate(cut.x0)]),
-      )
-end
-
-function to_dict(cut::Cut)
-  Dict(
-       "intercept" => cut.intercept,
-       "coefficients" => Dict(["x$(n)" => slope_n for (n, slope_n) in enumerate(cut.slope)]),
-      )
-end
-
-function to_dict(v::Vertex)
-  Dict(
-       "value" => v.value,
-       "state" => Dict(["x$(n)" => x_n for (n, x_n) in enumerate(v.point)]),
       )
 end
 
