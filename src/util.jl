@@ -32,6 +32,8 @@ function write_cuts_to_file(model::MSSP, filename::String)
         node_cuts = Dict(
             "node" => string(i),
             "single_cuts" => Dict{String,Any}[],
+            "multi_cuts" => Dict{String,Any}[],
+            "risk_set_cuts" => Vector{Float64}[],
         )
         for cut in stage.ext[:cuts]
           push!(node_cuts["single_cuts"], to_dict(cut))

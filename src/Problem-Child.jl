@@ -441,6 +441,8 @@ function write_policy_to_file(model::Vector{IO_stage}, filename::String)
             "node" => string(i),
             "single_cuts" => Dict{String,Any}[],
             "vertices" => Dict{String,Any}[],
+            "multi_vertices" => Dict{String,Any}[],
+            "risk_set_cuts" => Vector{Float64}[],
         )
 
         for cut in stage.cuts
