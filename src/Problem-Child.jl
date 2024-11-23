@@ -463,11 +463,11 @@ function to_dict(cut::Cut)
          "intercept" => cut.intercept,
          "coefficients" => Dict(["x$(n)" => slope_n for (n, slope_n) in enumerate(cut.slope)]),
         )
-  end
+end
 
-  function to_dict(v::Vertex)
+function to_dict(v::Vertex)
     Dict(
          "value" => v.value,
          "state" => Dict(["x$(n)" => x_n for (n, x_n) in enumerate(v.point)]),
         )
-  end
+end
