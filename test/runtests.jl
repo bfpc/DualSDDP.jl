@@ -5,7 +5,7 @@ using HiGHS: Optimizer
 
 solver = OptimizerWithAttributes(Optimizer, Silent() => true)
 
-using .DualSDDP
+using DualSDDP
 
 # A trivial one-stage problem
 module OneStage
@@ -96,5 +96,5 @@ function test_risk1()
   nothing
 end
 
-test_1stage()
+test_risk1()
 
