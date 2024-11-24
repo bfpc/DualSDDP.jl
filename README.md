@@ -3,19 +3,25 @@
 DualSDDP implements the Dual SDDP algorithm
 for multistage stochastic linear problems with stagewise independent uncertainty,
 allowing for polyhedral risk measures such as Expectation-AV@R.
-The theory is developped in https://arxiv.org/abs/2107.10930.
+The theory is developped in the paper
+[Dual SDDP for risk-averse multistage stochastic programs](https://www.sciencedirect.com/science/article/abs/pii/S0167637723000603)
+[[arXiv version](https://arxiv.org/abs/2107.10930)].
 
 It also implements, for comparison:
 - A primal SDDP algorithm
   * with outer approximations of the value function, and
-  * stochastic sampling in the scenario tree.
+  * stochastic sampling in the scenario tree;
 - a deterministic DDP algorithm
   * with inner and outer approximations for the value function, and
-  * worst-gap selection in the scenario tree.
+  * worst-gap selection in the scenario tree;
+- a Dynamic Programming upper bound
+  * built from a set of states in each stage, in the spirit of [Philpott et al.](https://www.jstor.org/stable/23481808).
 
 # Usage
 
 - Create a module `M`, of type `MSLBO`, containing the problem data;
+  * A simple example is `examples/1d_toy/hydro.jl`.
+  * An interface for problems with only right-hand side uncertainty is provided through `src/build.jl`, and the analog of the above example can be found in `examples/1d_toy_builder/hydro.jl`.
 - Determine the number of stages of the problem;
 - Choose the E-AV@R parameters and create builder functions (primal or dual)
   using `mk_primal_avar` and `mk_copersp_avar` (respectively);
